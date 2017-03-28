@@ -5,7 +5,7 @@ from json import dumps
 import psycopg2
 import os
 
-SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://w209@localhost/panama_papers"
+SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://panama_papers@localhost/panama_papers"
 e = create_engine(SQLALCHEMY_DATABASE_URI)
 
 app = Flask(__name__)
