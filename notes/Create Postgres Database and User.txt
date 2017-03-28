@@ -1,0 +1,67 @@
+### this is a comment 
+
+### user "michaelrubin" on gcloud host "w209: change context"
+michaelrubin@w299:~$ sudo su - postgres 
+
+### user "postgres" on gcloud host "w209: create 'panama_papers' user"
+postgres@w299:~$ createuser --interactive
+Enter name of role to add: panama_papers
+Shall the new role be a superuser? (y/n) y
+
+### log onto postgres as 'postgres'
+postgres@w299:~$ psql
+psql (9.5.6)
+Type "help" for help.
+
+### create a password for 'panama_papers' user
+postgres=# alter user "panama_papers" with password '******';
+ALTER ROLE
+
+### create thempy database named 'panama_papers', owned by panama_papers user
+postgres=# CREATE DATABASE panama_papers OWNER panama_papers;
+CREATE DATABASE
+
+### quite postgres, but remain in postgres@w299 context
+postgres=# \q
+postgres@w299:~$
+
+### restore the database from the dump, making use of 'panama_papers' user and password
+postgres@w299:~$ pg_restore -U panama_papers -d panama_papers -h 127.0.0.1 /home/michaelrubin/downloads/panama_papers.dump
+Password: ********
+
+### log back in to postgress
+postgres@w299:~$ psql
+psql (9.5.6)
+Type "help" for help.
+
+### switch to the panama_papers database
+postgres=# \connect panama_papers
+You are now connected to database "panama_papers" as user "postgres".
+
+### list the tables
+panama_papers=# \dt
+                   List of relations
+ Schema |         Name         | Type  |     Owner     
+--------+----------------------+-------+---------------
+ public | addresses            | table | panama_papers
+ public | all_edges            | table | panama_papers
+ public | country_geos         | table | panama_papers
+ public | entities             | table | panama_papers
+ public | intermediaries       | table | panama_papers
+ public | officers             | table | panama_papers
+ public | officers_to_entities | table | panama_papers
+(7 rows)
+
+### query 
+panama_papers=# SELECT COUNT(*) FROM addresses
+panama_papers-# ;
+ count  
+--------
+ 151605
+(1 row)
+
+### quit postgres
+panama_papers=# \q
+postgres@w299:~$ exit
+logout
+michaelrubin@w299:~$ 
