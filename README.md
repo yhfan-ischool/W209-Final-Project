@@ -6,6 +6,7 @@
 pg_ctl -D /usr/local/var/postgres_9.6 start
 pg_ctl -D /usr/local/var/postgres_9.6 stop
 ```
+(see **\notes\Create Postgres Database and User.txt** for Postgres restore instructions)
 
 ## Start the API server
 
