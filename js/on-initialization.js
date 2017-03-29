@@ -12,14 +12,18 @@ $(function(){
 	function setElementWidth(desc){
 		console.log("setElementWidth", desc);
 		var elwidth = $(window).width();
-		$("#title-image").css("max-width", elwidth);		
+		$("#title-image").css("max-width", elwidth);
 	}
-	
+
 	var width = Math.max(960, window.innerWidth),
 		height = Math.max(500, window.innerHeight),
 		startColor = "#ff3399",
 		endColor = "#ffcc00",
 		linkColor = "#99ff33",
+		dateSliderWidth = Math.round(width * 0.8),
+		dateSliderHeight = 50,
+		mapWidth = width,
+		mapHeight = height - dateSliderHeight,
 		prefix = prefixMatch(["webkit", "ms", "Moz", "O"]);
 
 	var tile = d3.geo.tile()
@@ -30,38 +34,138 @@ $(function(){
 	var zoom = d3.behavior.zoom()
 		.scale(1 << 11)
 		.scaleExtent([1 << 9, 1 << 23])
-		.translate([width / 2, height / 2])
+		.translate([mapWidth / 2, mapHeight / 2])
 		.on("zoom", zoomed);
 
-	var map = d3.select("#slidr-map").append("div")
-		.attr("class", "map")
-		.style("width", width + "px")
-		.style("height", height + "px")
+	var map = d3.select("#data-map").append("div")
+	  .attr("class", "map")
+		.style("width", mapWidth + "px")
+		.style("height", mapHeight + "px")
 		.call(zoom);
 
+  // Basemap layer
 	var layer = map.append("div")
 		.attr("class", "layer");
 
+  // Selected Date layer
+  var selectedDateLayer = map.append("div")
+                             .attr("class", "selected-date")
+                             .style("left", ((width - 100) / 2) + "px");
+
+  // Data layer
 	var svg = map.append("svg")
 		.attr("class", "layer")
-		.attr("width", width)
-		.attr("height", height);
+		.attr("width", mapWidth)
+		.attr("height", mapHeight);
+
+	// Date slider
+	var sliderPanel = d3.select("#date-slider")
+	                    .append("svg")
+	                    .attr("width", width)
+	                    .attr("height", dateSliderHeight)
+                      .append("g")
+                      .attr("transform", "translate(" + (width - dateSliderWidth) / 2 + "," + 0 + ")");
 
 	var info = map.append("div")
 		.attr("class", "info");
-	
+
+  // Data galore!
+	var dataArray = [];
+  var selectedDate = new Date();
+
 	console.log("spinner", "on");
 	document.getElementById("loader").style.display = "block";
-	var dataArray = [];
 	$.getJSON("//localhost:8080/associations", function( data ) {
 		dataArray = data;
+    var minDate = new Date();
+
+	  dataArray.forEach(function(v) {
+		  var vDate = new Date(v.start_date);
+		  if (vDate < minDate) {
+		    minDate = vDate;
+		  }
+    });
 
 		document.getElementById("loader").style.display = "none";
 		console.log("spinner", "off");
 		zoomed();
+
+    // setup our brush as slider for date selection
+    var sliderHeightOffset = dateSliderHeight / 2;
+    var sliderX = d3.time.scale()
+        .domain([minDate, new Date()])
+        .range([0, dateSliderWidth])
+        .clamp(true);
+
+    brush = d3.svg.brush()
+        .x(sliderX)
+        .extent([sliderX.domain()[0],sliderX.domain()[0]])
+        .on("brush", brushed)
+        .on("brushend",brushended);
+
+    sliderPanel.append("g")
+        .attr("class", "slider-x axis")
+        .attr("transform", "translate(0," + sliderHeightOffset + ")")
+        .call(d3.svg.axis()
+          .scale(sliderX)
+          .orient("bottom")
+          .ticks(d3.time.years)
+          .tickFormat(d3.time.format("%Y")))
+      .select(".domain")
+      .select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
+        .attr("class", "halo");
+
+    var slider = sliderPanel.append("g")
+        .attr("class", "date-slider")
+        .call(brush);
+
+    slider.selectAll(".extent,.resize")
+        .remove();
+
+    slider.select(".background")
+        .attr("height", height);
+
+    var handle = slider.append("circle")
+        .attr("class", "date-slider-handle")
+        .attr("transform", "translate(0," + sliderHeightOffset + ")")
+        .attr("r", 9);
+
+    // Slider handlers
+    function brushed() {
+      var value;
+
+      if (typeof brush.extent() !== "undefined") {
+        value = brush.extent()[0];
+
+        if (d3.event.sourceEvent) { // not a programmatic event
+          value = d3.time.day.offset(d3.time.month.round(sliderX.invert(d3.mouse(this)[0])),-1);
+          brush.extent([value, value]);
+        }
+      }
+      else
+        value = sliderX.domain()[0];
+
+      updateMap( value );
+      handle.attr("cx", sliderX(value));
+
+    }
+
+    function brushended() {
+      // This does nothing for now.
+    }
+
+    function updateMap( value ) {
+      selectedDate = value;
+      selectedDateLayer.style("left", (width - 100) / 2).html(d3.time.format("%Y-%m-%d")(selectedDate));
+      zoomed();
+    }
+
+    handle.attr("cx", sliderX(selectedDate));
+    updateMap(selectedDate);
 	});
 
 	setElementWidth("ready");
+
 	zoomed();
 
 	function zoomed() {
@@ -111,57 +215,72 @@ $(function(){
 		  var startCoordinates = projection([parseFloat(v.start_x), parseFloat(v.start_y)]);
 		  var endCoordinates = projection([parseFloat(v.end_x), parseFloat(v.end_y)]);
 
-		  startArray.push({
-			countryCode: v.start_country_code,
-			countryName: v.start_country_name,
-			longitude: v.start_x,
-			latitude: v.start_y,
-			x: startCoordinates[0],
-			y: startCoordinates[1]
-		  });
-		  endArray.push({
-			countryCode: v.end_country_code,
-			countryName: v.end_country_name,
-			longitude: v.end_x,
-			latitude: v.end_y,
-			x: endCoordinates[0],
-			y: endCoordinates[1]
-		  });
-		  edgeArray.push({
-			startX: startCoordinates[0],
-			startY: startCoordinates[1],
-			endX: endCoordinates[0],
-			endY: endCoordinates[1]
-		  });
+      var startDate = new Date(v.start_date);
+      var endDate = new Date(v.end_date);
+
+      if (startDate <= selectedDate && (v.end_date == "None" || endDate > selectedDate)) {
+        startArray.push({
+          countryCode: v.start_country_code,
+          countryName: v.start_country_name,
+          longitude: v.start_x,
+          latitude: v.start_y,
+          x: startCoordinates[0],
+          y: startCoordinates[1],
+          startDate: startDate,
+          endDate: endDate
+        });
+        endArray.push({
+          countryCode: v.end_country_code,
+          countryName: v.end_country_name,
+          longitude: v.end_x,
+          latitude: v.end_y,
+          x: endCoordinates[0],
+          y: endCoordinates[1],
+          startDate: startDate,
+          endDate: endDate
+        });
+        edgeArray.push({
+          startX: startCoordinates[0],
+          startY: startCoordinates[1],
+          endX: endCoordinates[0],
+          endY: endCoordinates[1],
+          startDate: startDate,
+          endDate: endDate
+        });
+      }
 	  });
 
 	  // Draw data points and links
+	  drawData(startArray, endArray, edgeArray);
+	}
+
+  function drawData(startPoints, endPoints, connections) {
 	  svg.selectAll("circle.start-circle").remove();
 	  svg.selectAll("circle.end-circle").remove();
-	  svg.selectAll("line.edge").remove();
-	  svg.selectAll("circle.start-circle").data(startArray).enter().append("circle")
+	  svg.selectAll("path.edge").remove();
+	  svg.selectAll("circle.start-circle").data(startPoints).enter().append("circle")
 		 .attr("class", "start-circle")
 		 .attr("r", 10)
 		 .attr("fill", startColor)
 		 .attr("cx", function (d){ return d.x; })
 		 .attr("cy", function (d){ return d.y; });
-	  svg.selectAll("circle.end-circle").data(endArray).enter().append("circle")
+	  svg.selectAll("circle.end-circle").data(endPoints).enter().append("circle")
 		 .attr("class", "end-circle")
 		 .attr("r", 5)
 		 .attr("fill", endColor)
 		 .attr("cx", function (d){ return d.x; })
 		 .attr("cy", function (d){ return d.y; });
 
-	  svg.selectAll("line.edge").data(edgeArray).enter().append("line")
-		 .attr("class", "edge")
-		 .attr("r", 4)
-		 .attr("stroke", linkColor)
-		 .attr("stroke-width", "1px")
-		 .attr("x1", function (d){ return d.startX; })
-		 .attr("y1", function (d){ return d.startY; })
-		 .attr("x2", function (d){ return d.endX; })
-		 .attr("y2", function (d){ return d.endY; });
-	}
+    svg.selectAll("path.edge").data(connections).enter().append("path")
+      .attr("class", "edge")
+      .attr("d", function(d) {
+        var sx = d.startX, sy = d.startY,
+            tx = d.endX, ty = d.endY,
+            dx = tx - sx, dy = ty - sy,
+            dr = 2 * Math.sqrt(dx * dx + dy * dy);
+        return "M" + sx + "," + sy + "A" + dr + "," + dr + " 0 0,1 " + tx + "," + ty;
+      });
+  }
 
 	function matrix3d(scale, translate) {
 		var k = scale / 256, r = scale % 1 ? Number : Math.round;
@@ -173,6 +292,4 @@ $(function(){
 		while (++i < n) if (p[i] + "Transform" in s) return "-" + p[i].toLowerCase() + "-";
 		return "";
 	}
-	
-	
 });

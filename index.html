@@ -10,12 +10,13 @@
         <script src="//d3js.org/topojson.v1.min.js"></script>
         <script src="js/jquery-3.2.0.min.js"></script>
 		<script src="js/on-initialization.js"></script>
-		
+
 		<!-- Bootstrap CSS -->
 		<link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
         <link rel="stylesheet" href="css/bootstrap-override.css">
-		
+
         <link rel="stylesheet" href="css/base.css">
+        <link rel="stylesheet" href="css/brush.css">
         <link rel="stylesheet" href="css/spinner.css">
         <link rel="stylesheet" href="css/slidr.css">
 		<link rel="icon" href="/images/favicon.ico?" type="image/x-icon">
@@ -46,13 +47,16 @@
 			<a href="https://panamapapers.icij.org/" target="_blank">Learn more &raquo;</a>
 		  </div>
 		</div>
-	
+
 		<div id="loader"></div>
 		<div id="slidr-id" style="display: inline-block;">
 			<div data-slidr="one">
 				<img id="title-image" src="images/panama_papers_title1.jpg" onclick="slidr.slide('right');" />
 			</div>
-			<div id="slidr-map" data-slidr="two"></div>
+			<div id="slidr-map" data-slidr="two">
+			  <div id="data-map"></div>
+			  <div id="date-slider"></div>
+			</div>
 			<!-- <div data-slidr="three"></div> -->
 		</div>
 
@@ -79,20 +83,20 @@
 			<p>W209 Data Visualization Spring 2017<br /></p>
 		  </footer>
 		</div> <!-- /container -->
-		
+
         <script src="js/slidr.js"></script>
         <script>
 			var slidr = slidr.create('slidr-id', {
-			  after: function(e) { 
-				console.log('in: ' + e.in.slidr); 
+			  after: function(e) {
+				console.log('in: ' + e.in.slidr);
 				if( e.in.slidr == 'one'){
 					slidr.controls('none');
 				}else{
 					slidr.controls('border');
 				}
 			  },
-			  before: function(e) { 
-				console.log('out: ' + e.out.slidr); 
+			  before: function(e) {
+				console.log('out: ' + e.out.slidr);
 			  },
 			  breadcrumbs: false,
 			  controls: 'none',
@@ -106,7 +110,7 @@
 			  //touch: true,
 			  transition: 'cube'
 			}).start();
-			
+
         </script>
     </body>
 </html>

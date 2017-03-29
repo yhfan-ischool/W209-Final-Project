@@ -59,15 +59,19 @@ class Addresses(Resource):
 
 class Associations(Resource):
 
-  # Get only the first 500 active ones for now for development.
+  # Get only the ones incorporated after 2009-01-01 for now for development.
+  #   count = 32260
   def get(self):
     # connect to the db
     conn = e.connect()
-    long_query_string = ("WITH active_collection AS ("
+    long_query_string = ("WITH collection AS ("
                          "  SELECT start_country_code,"
-                         "         end_country_code"
+                         "         end_country_code,"
+                         "         incorporation_date,"
+                         "         inactivation_date,"
+                         "         struck_off_date"
                          "    FROM officers_to_entities"
-                         "    WHERE status = 'Active'"
+                         "    WHERE incorporation_date >= '2009-01-01'"
                          ")"
                          "SELECT t1.start_country_code,"
                          "       t2.country AS start_country_name,"
@@ -76,8 +80,11 @@ class Associations(Resource):
                          "       t1.end_country_code,"
                          "       t3.country AS end_country_name,"
                          "       t3.longitude_average AS end_x,"
-                         "       t3.latitude_average AS end_y"
-                         "  FROM active_collection t1"
+                         "       t3.latitude_average AS end_y,"
+                         "       t1.incorporation_date AS start_date,"
+                         "       t1.inactivation_date AS pause_date,"
+                         "       t1.struck_off_date AS end_date"
+                         "  FROM collection t1"
                          "  LEFT JOIN country_geos t2"
                          "  ON (t2.alpha_3_code = t1.start_country_code)"
                          "  LEFT JOIN country_geos t3"
@@ -90,10 +97,13 @@ class Associations(Resource):
 	             "start_country_name": r[1],
 	             "start_x": str(r[2]),
 	             "start_y": str(r[3]),
+	             "start_date": str(r[8]),
+	             "pause_date": str(r[9]),
 	             "end_country_code": r[4],
 	             "end_country_name": r[5],
 	             "end_x": str(r[6]),
-	             "end_y": str(r[7]) }
+	             "end_y": str(r[7]),
+	             "end_date": str(r[10]) }
 	  results.append(record)
     return results
 

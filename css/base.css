@@ -40,3 +40,22 @@ body {
   width: 256px;
   height: 256px;
 }
+
+.selected-date {
+  z-index: 2;
+  position: absolute;
+  pointer-events: none;
+  width: 100px;
+  height: 20px;
+  bottom: 3px;
+  background: #FFFFFF;
+  font-weight: bold;
+  text-align: center;
+}
+
+.edge {
+  fill: none;
+  stroke: #99ff33;
+  stroke-width: 2px;
+  stroke-opacity: .8;
+}
