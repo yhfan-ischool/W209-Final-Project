@@ -49,16 +49,19 @@ $(function(){
 
 	var info = map.append("div")
 		.attr("class", "info");
-
+	
+	console.log("spinner", "on");
 	document.getElementById("loader").style.display = "block";
 	var dataArray = [];
 	$.getJSON("//localhost:8080/associations", function( data ) {
 		dataArray = data;
 
 		document.getElementById("loader").style.display = "none";
+		console.log("spinner", "off");
 		zoomed();
 	});
 
+	setElementWidth("ready");
 	zoomed();
 
 	function zoomed() {
@@ -170,4 +173,6 @@ $(function(){
 		while (++i < n) if (p[i] + "Transform" in s) return "-" + p[i].toLowerCase() + "-";
 		return "";
 	}
+	
+	
 });

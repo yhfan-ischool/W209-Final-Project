@@ -1,0 +1,19 @@
+.navbar,
+.navbar-inverse,
+.navbar-brand,
+.navbar-fixed-top {
+	background-color:#666;
+	border-color:#666;
+	border-width:0 0 0px;
+	border-top: solid 0px #666;
+	color:white !important;
+}
+.jumbotron{
+	padding-bottom: 15px;
+	margin-bottom:0px;
+}
+.jumbotron h2{ color:#4368A1; }
+.jumbotron p{
+	color:#666; 
+	font-size:17px;
+}

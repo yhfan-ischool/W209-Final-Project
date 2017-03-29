@@ -1,4 +1,5 @@
 .graticule {
+  z-index: 1;
   fill: none;
   stroke: #777;
   stroke-width: .5px;
@@ -6,10 +7,12 @@
 }
 
 .land {
+  z-index: 1;
   fill: #222;
 }
 
 .boundary {
+  z-index: 1;
   fill: none;
   stroke: #fff;
   stroke-width: .5px;
@@ -20,15 +23,18 @@ body {
 }
 
 .map {
+  z-index: 1;
   position: relative;
   overflow: hidden;
 }
 
 .layer {
+  z-index: 1;
   position: absolute;
 }
 
 .tile {
+  z-index: 1;
   pointer-events: none;
   position: absolute;
   width: 256px;
