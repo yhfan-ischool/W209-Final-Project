@@ -16,7 +16,7 @@ $(function(){
 	}
 
 	var width = Math.max(960, window.innerWidth),
-		height = Math.max(500, window.innerHeight),
+		height = Math.max(500, 0.4752 * width),
 		startColor = "#ff3399",
 		endColor = "#ffcc00",
 		linkColor = "#99ff33",
