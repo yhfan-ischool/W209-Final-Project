@@ -1,4 +1,5 @@
 $(function(){
+	$("#date-slider").css("display", "block").hide();
 	$(window).on("load", function () {
 		setElementWidth("load");
 	});
@@ -9,10 +10,26 @@ $(function(){
 	$(window).on("resize", function () {
 		setElementWidth("resize");
 	});
+	
+	$("#dialog-code").click(function(){
+		advanceToDetailView()
+	});
+	
+	
+	$("#dialog").hide();
+	
 	function setElementWidth(desc){
 		console.log("setElementWidth", desc);
 		var elwidth = $(window).width();
 		$("#title-image").css("max-width", elwidth);
+		var styles = {
+			width: elwidth,
+			height: .4752 * elwidth,
+			padding: "50px",
+			"background-color": "#dfe5ac",
+			"font-size":"16px"
+		};
+		$("#network-view-data").css(styles);
 	}
 
 	var width = Math.max(960, window.innerWidth),
@@ -23,7 +40,7 @@ $(function(){
 		dateSliderWidth = Math.round(width * 0.8),
 		dateSliderHeight = 50,
 		mapWidth = width,
-		mapHeight = height - dateSliderHeight,
+		mapHeight = height,
 		prefix = prefixMatch(["webkit", "ms", "Moz", "O"]);
 
 	var tile = d3.geo.tile()
@@ -201,9 +218,9 @@ $(function(){
 		svg.selectAll("path.graticule").remove();
 
 		svg.append("path")
-		.datum(graticule)
-		.attr("class", "graticule")
-		.attr("d", path);
+			.datum(graticule)
+			.attr("class", "graticule")
+			.attr("d", path);
 
 		// Project data's lat/lon to map's coordinates
 		var startArray = [];
@@ -261,14 +278,23 @@ $(function(){
 			.attr("class", "start-circle")
 			.attr("r", 10)
 			.attr("fill", startColor)
+			.attr("title", "Country")
+			.attr("data-toggle", "modal")
+			.attr("data-target", "#modalDI")
+			.attr("countryCode", function (d){ return d.countryCode; })
 			.attr("cx", function (d){ return d.x; })
-			.attr("cy", function (d){ return d.y; });
-		svg.selectAll("circle.end-circle").data(endPoints).enter().append("circle")
+			.attr("cy", function (d){ return d.y; })
+			.attr("onclick", "circleClick(this, 'Country')");
+
+			svg.selectAll("circle.end-circle").data(endPoints).enter().append("circle")
 			.attr("class", "end-circle")
 			.attr("r", 5)
 			.attr("fill", endColor)
+			.attr("title", "Country")
+			.attr("countryCode", function (d){ return d.countryCode; })
 			.attr("cx", function (d){ return d.x; })
-			.attr("cy", function (d){ return d.y; });
+			.attr("cy", function (d){ return d.y; })
+			.attr("onclick", "circleClick(this, 'Country')");
 
 		svg.selectAll("path.edge").data(connections).enter().append("path")
 			.attr("class", "edge")
@@ -279,6 +305,7 @@ $(function(){
             dr = 2 * Math.sqrt(dx * dx + dy * dy);
 			return "M" + sx + "," + sy + "A" + dr + "," + dr + " 0 0,1 " + tx + "," + ty;
 		});
+
 	}
 
 	function matrix3d(scale, translate) {

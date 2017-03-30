@@ -1,0 +1,12 @@
+div.dialog-code{
+	cursor:pointer;
+}
+
+/* circular mask around portrait images */
+img.clip-path{
+	height:200px;
+	width:200px;
+	clip-path: circle();
+	margin-bottom:4px;
+}
+
