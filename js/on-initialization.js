@@ -113,7 +113,7 @@ $(function(){
 
 	console.log("spinner", "on");
 	document.getElementById("loader").style.display = "block";
-	var baseUrl = '//localhost:5000';
+	var baseUrl = '//localhost:8080';
 
 	// Each of the following paths will be set based on the combination of selections made
 	// on the page, which can be either the map view or the detail view.
