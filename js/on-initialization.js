@@ -10,14 +10,14 @@ $(function(){
 	$(window).on("resize", function () {
 		setElementWidth("resize");
 	});
-	
+
 	$("#dialog-code").click(function(){
 		advanceToDetailView()
 	});
-	
-	
+
+
 	$("#dialog").hide();
-	
+
 	function setElementWidth(desc){
 		console.log("setElementWidth", desc);
 		var elwidth = $(window).width();
@@ -31,6 +31,7 @@ $(function(){
 		};
 		$("#network-view-data").css(styles);
 	}
+
 
 	var width = Math.max(960, window.innerWidth),
 		height = Math.max(500, 0.4752 * width),
@@ -76,7 +77,7 @@ $(function(){
 		.attr("height", mapHeight);
 
 	// Date slider
-	var sliderPanel = d3.select("#date-slider")
+	window.sliderPanel = d3.select("#date-slider")
 		.append("svg")
 		.attr("width", width)
 		.attr("height", dateSliderHeight)
@@ -86,98 +87,173 @@ $(function(){
 	var info = map.append("div")
 		.attr("class", "info");
 
-	// Data galore!
-	var dataArray = [];
-	var selectedDate = new Date();
+	var maxDate = maxDate || new Date(0);
+	var minDate = minDate || new Date();
+	var selectedDate = selectedDate || new Date('2016-12-01');
+
+	if (window.connectionCountArray.length == 0)
+		d3.csv('connection_count.csv', function(data) {
+			data.forEach(function(v) {
+				var monthStartDate = new Date(v.date);
+				maxDate = (monthStartDate > maxDate) ? monthStartDate : maxDate;
+				minDate = (monthStartDate < minDate) ? monthStartDate : minDate;
+				window.connectionCountArray.push({
+					monthDate: monthStartDate,
+					includesEntity: parseInt(v.includes_entity),
+					includesOfficer: parseInt(v.includes_officer),
+					includesIntermediary: parseInt(v.includes_intermediary),
+					total: parseInt(v.includes_entity) + parseInt(v.includes_officer) + parseInt(v.includes_intermediary)
+				});
+			});
+			selectedDate = maxDate;
+			setUpDateSlider(minDate, maxDate);
+		});
+
+	var selectedDateString = function(date) { return d3.time.format("%Y-%m-01")(date); }
 
 	console.log("spinner", "on");
 	document.getElementById("loader").style.display = "block";
-	$.getJSON("//localhost:8080/associations", function( data ) {
-		dataArray = data;
-		var minDate = new Date();
+	var baseUrl = '//localhost:5000';
 
-		dataArray.forEach(function(v) {
-		var vDate = new Date(v.start_date);
-		if (vDate < minDate) {
-		    minDate = vDate;
-		}
-    });
+	// Each of the following paths will be set based on the combination of selections made
+	// on the page, which can be either the map view or the detail view.
 
-	document.getElementById("loader").style.display = "none";
-	console.log("spinner", "off");
-	zoomed();
+	var apiPath = function(endPoint, date) {
+		return '/' + endPoint + '/' + selectedDateString(date);
+	}
+	var edgeTypePath = function(nodeId = null, countryCode = null) {
+		// TODO: edgeTypePath will look like /nodeid/12345 when a specific node is selected
+		//       or /countrycode/PAN when a specific country is selected
+		return '';
+	}
+	var nodeTypePath = function(includesOfficers = true, includesIntermediaries = true) {
+		// TODO: true/false will be set based on selected checkboxes
+		return '/incl_officers/' +
+		       (includesOfficers == true ? 'true' : 'false') +
+		       '/incl_intermediaries/' +
+		       (includesIntermediaries == true ? 'true' : 'false');
+	}
+	var depthPath = function(depth = null) {
+		// TODO: depthPath will look like /maxrecursions/5 when an API endpoint other than
+		//       /edges_all_countries_json is called
+		return '';
+	}
 
-    // setup our brush as slider for date selection
-    var sliderHeightOffset = dateSliderHeight / 2;
-    var sliderX = d3.time.scale()
-        .domain([minDate, new Date()])
-        .range([0, dateSliderWidth])
-        .clamp(true);
 
-    brush = d3.svg.brush()
-        .x(sliderX)
-        .extent([sliderX.domain()[0],sliderX.domain()[0]])
-        .on("brush", brushed)
-        .on("brushend",brushended);
+	var requestUrl = function(endPoint, date, nodeId = null, countryCode = null, includesOfficers = true, includesIntermediaries = true, depth = null) {
+		return baseUrl +
+		apiPath(endPoint, date) +
+		edgeTypePath(nodeId, countryCode) +
+		nodeTypePath(includesOfficers, includesIntermediaries) +
+		depthPath(depth);
+	}
+	var dataArray = [];
 
-    sliderPanel.append("g")
-        .attr("class", "slider-x axis")
-        .attr("transform", "translate(0," + sliderHeightOffset + ")")
-        .call(d3.svg.axis()
-		.scale(sliderX)
-		.orient("bottom")
-		.ticks(d3.time.years)
-		.tickFormat(d3.time.format("%Y")))
-		.select(".domain")
-		.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
-        .attr("class", "halo");
+	// Data galore!
+	function fetchData(apiUrl, callbackFunction) {
+		$.getJSON(apiUrl, callbackFunction);
+	}
 
-    var slider = sliderPanel.append("g")
-        .attr("class", "date-slider")
-        .call(brush);
+	function setUpDateSlider(minDate, maxDate) {
+		// setup our brush as slider for date selection
+		var sliderHeightOffset = dateSliderHeight / 2;
+		window.sliderX = d3.time.scale()
+		    .domain([minDate, maxDate])
+		    .range([0, dateSliderWidth])
+		    .clamp(true);
 
-    slider.selectAll(".extent,.resize")
-        .remove();
+		window.dateBrush = d3.svg.brush()
+		    .x(sliderX)
+		    .extent([sliderX.domain()[0],sliderX.domain()[0]])
+		    .on("brush", brushed)
+		    .on("brushend",brushended);
 
-    slider.select(".background")
-        .attr("height", height);
+		sliderPanel.append("g")
+		    .attr("class", "slider-x axis")
+		    .attr("transform", "translate(0," + sliderHeightOffset + ")")
+		    .call(d3.svg.axis()
+			.scale(window.sliderX)
+			.orient("bottom")
+			.ticks(d3.time.years)
+			.tickFormat(d3.time.format("%Y")))
+			.select(".domain")
+			.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
+		    .attr("class", "halo");
 
-    var handle = slider.append("circle")
-        .attr("class", "date-slider-handle")
-        .attr("transform", "translate(0," + sliderHeightOffset + ")")
-        .attr("r", 9);
+		window.slider = sliderPanel.append("g")
+		    .attr("class", "date-slider")
+		    .call(dateBrush);
 
-    // Slider handlers
-    function brushed() {
-		var value;
+		slider.selectAll(".extent,.resize")
+		    .remove();
 
-		if (typeof brush.extent() !== "undefined") {
-			value = brush.extent()[0];
+		slider.select(".background")
+		    .attr("height", height);
 
-			if (d3.event.sourceEvent) { // not a programmatic event
-				value = d3.time.day.offset(d3.time.month.round(sliderX.invert(d3.mouse(this)[0])),-1);
-				brush.extent([value, value]);
+		window.dateSliderHandle = slider.append("circle")
+		    .attr("class", "date-slider-handle")
+		    .attr("transform", "translate(0," + sliderHeightOffset + ")")
+		    .attr("r", 9);
+
+		// Slider handlers
+		var brushTimer;
+		function brushedValue(target, event) {
+			var value;
+
+			if (typeof window.dateBrush.extent() !== "undefined") {
+				value = window.dateBrush.extent()[0];
+				console.log(value);
+
+				if (event) { // not a programmatic event
+					value = d3.time.day.offset(d3.time.month.round(window.sliderX.invert(d3.mouse(target)[0])),-1);
+
+					window.dateBrush.extent([value, value]);
+				}
+			} else {
+				value = window.sliderX.domain()[0];
 			}
-		} else {
-			value = sliderX.domain()[0];
+
+			return value;
 		}
 
-		updateMap( value );
-		handle.attr("cx", sliderX(value));
-    }
+		function brushed() {
+			var value;
+			var target = this;
+			var endEvent = d3.event.sourceEvent;
 
-    function brushended() {
-      // This does nothing for now.
-    }
+			window.dateSliderHandle.attr("cx", window.sliderX(brushedValue(this, endEvent)));
+		};
 
-    function updateMap( value ) {
+		function brushended() {
+			var value;
+			var target = this;
+			var endEvent = d3.event.sourceEvent;
+			var v = brushedValue(target, endEvent);
+			updateMap(v);
+		}
+	}
+
+	function updateMap( value ) {
 		selectedDate = value;
-		selectedDateLayer.style("left", (width - 100) / 2).html(d3.time.format("%Y-%m-%d")(selectedDate));
-		zoomed();
-    }
+		selectedDateLayer.style("left", (width - 100) / 2).html(d3.time.format("%b %Y")(selectedDate));
+		var url = requestUrl(window.apiEndPoints[0], selectedDate, null, null, true, true, null);
+		fetchData(url, function( data ) {
+			dataArray = data;
+			zoomed();
+		});
+	}
 
-    handle.attr("cx", sliderX(selectedDate));
-    updateMap(selectedDate);
+	// Initial data fetch on load.
+	var initialRequestUrl = requestUrl(window.apiEndPoints[0], selectedDate, null, null, true, true, null);
+	fetchData(initialRequestUrl, function( data ) {
+		dataArray = data;
+
+		document.getElementById("loader").style.display = "none";
+		console.log("spinner", "off");
+		zoomed();
+
+		window.dateSliderHandle.attr("cx", window.sliderX(selectedDate));
+		updateMap(selectedDate);
 	});
 
 	setElementWidth("ready");
@@ -228,42 +304,35 @@ $(function(){
 		var edgeArray = [];
 
 		dataArray.forEach(function(v) {
-			var startCoordinates = projection([parseFloat(v.start_x), parseFloat(v.start_y)]);
-			var endCoordinates = projection([parseFloat(v.end_x), parseFloat(v.end_y)]);
+			var startCoordinates = projection([parseFloat(v.x1), parseFloat(v.y1)]);
+			var endCoordinates = projection([parseFloat(v.x2), parseFloat(v.y2)]);
+			var monthDate = new Date(v.date);
 
-			var startDate = new Date(v.start_date);
-			var endDate = new Date(v.end_date);
-
-			if (startDate <= selectedDate && (v.end_date == "None" || endDate > selectedDate)) {
-				startArray.push({
-					countryCode: v.start_country_code,
-					countryName: v.start_country_name,
-					longitude: v.start_x,
-					latitude: v.start_y,
-					x: startCoordinates[0],
-					y: startCoordinates[1],
-					startDate: startDate,
-					endDate: endDate
-				});
-				endArray.push({
-					countryCode: v.end_country_code,
-					countryName: v.end_country_name,
-					longitude: v.end_x,
-					latitude: v.end_y,
-					x: endCoordinates[0],
-					y: endCoordinates[1],
-					startDate: startDate,
-					endDate: endDate
-				});
-				edgeArray.push({
-					startX: startCoordinates[0],
-					startY: startCoordinates[1],
-					endX: endCoordinates[0],
-					endY: endCoordinates[1],
-					startDate: startDate,
-					endDate: endDate
-				});
-			}
+			startArray.push({
+				countryCode: v.country_code_1,
+				countryName: v.country_1,
+				longitude: v.x1,
+				latitude: v.y1,
+				x: startCoordinates[0],
+				y: startCoordinates[1],
+				monthDate: monthDate
+			});
+			endArray.push({
+				countryCode: v.country_code_2,
+				countryName: v.country_2,
+				longitude: v.x2,
+				latitude: v.y2,
+				x: endCoordinates[0],
+				y: endCoordinates[1],
+				monthDate: monthDate
+			});
+			edgeArray.push({
+				startX: startCoordinates[0],
+				startY: startCoordinates[1],
+				endX: endCoordinates[0],
+				endY: endCoordinates[1],
+				monthDate: monthDate
+			});
 		});
 
 		// Draw data points and links
@@ -299,10 +368,10 @@ $(function(){
 		svg.selectAll("path.edge").data(connections).enter().append("path")
 			.attr("class", "edge")
 			.attr("d", function(d) {
-        var sx = d.startX, sy = d.startY,
-            tx = d.endX, ty = d.endY,
-            dx = tx - sx, dy = ty - sy,
-            dr = 2 * Math.sqrt(dx * dx + dy * dy);
+	    var sx = d.startX, sy = d.startY,
+	        tx = d.endX, ty = d.endY,
+	        dx = tx - sx, dy = ty - sy,
+	        dr = 2 * Math.sqrt(dx * dx + dy * dy);
 			return "M" + sx + "," + sy + "A" + dr + "," + dr + " 0 0,1 " + tx + "," + ty;
 		});
 

@@ -8,11 +8,17 @@ from werkzeug.routing import BaseConverter, ValidationError
 import psycopg2
 import os
 
-SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://postgres:halibut@localhost/panama_papers"
+SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://panama_papers@localhost/panama_papers"
 e = create_engine(SQLALCHEMY_DATABASE_URI)
 
 app = Flask(__name__)
-	
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
+    return response
+
 @app.route('/')
 def index():
 	return 'Hello World!'
@@ -25,7 +31,7 @@ def index():
 @app.route('/edges_all_countries/<selected_date>/incl_officers/<incl_officers>/incl_intermediaries/<incl_intermediaries>/', methods=['GET'])
 def get_edges_all_countries(selected_date, incl_officers, incl_intermediaries):
 	conn = e.connect()
-	query_string = "SELECT * FROM edges_all_countries( '" + selected_date + "', " + incl_officers + ", " + incl_intermediaries + ", 1000000 );"
+	query_string = "SELECT * FROM edges_all_countries( '" + selected_date + "', " + incl_officers + ", " + incl_intermediaries + ", 1000000 ) WHERE country_code_1 IS NOT NULL AND country_code_2 IS NOT NULL AND x1 IS NOT NULL AND x2 IS NOT NULL;"
 	print "\n%s" % query_string
 	query = conn.execute(query_string)
 	
