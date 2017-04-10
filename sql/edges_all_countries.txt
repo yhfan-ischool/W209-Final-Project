@@ -1,0 +1,103 @@
+-- SELECT * FROM edges_all_countries( '2013-12-01', true, true, 1000000 );
+drop FUNCTION edges_all_countries ( p_d DATE, p_incl_officer BOOLEAN, p_incl_intermediary BOOLEAN, p_limit INT );
+create or replace FUNCTION edges_all_countries (
+	p_d DATE, 
+	p_incl_officer BOOLEAN, 
+	p_incl_intermediary BOOLEAN,
+	p_limit INT
+) returns table( 
+	node1_name text,
+	node2_name text,
+	rel_type varchar(100),
+	date date,
+	node_id1 int,
+	node_type_1 varchar(20),
+	country_code_1 char(3),
+	country_1 text,
+	x1 text,
+	y1 text,
+	node_id2 int,
+	node_type_2 varchar(20),
+	country_code_2 char(3),
+	country_2 text,
+	x2 text,
+	y2 text,
+	includes_entity boolean, 
+	includes_officer boolean, 
+	includes_intermediary boolean, 
+	weight int
+)
+AS $$
+BEGIN
+	return query execute
+	'WITH RECURSIVE a AS (
+		SELECT 
+			date,
+			node_id1, 
+			node_type_1, 
+			COALESCE( country_code_1a, country_code_1b, country_code_1c )country_code_1,
+			rel_type,
+			node_id2, 
+			node_type_2, 
+			COALESCE( country_code_2a, country_code_2b, country_code_2c )country_code_2,
+			includes_entity, 
+			includes_officer, 
+			includes_intermediary, 
+			weight
+		FROM Date_Edge 
+		WHERE
+			date = ''' || p_d::date || '''			
+		AND node_type_1 = ''entity'' 
+		UNION ALL
+		SELECT 
+			de.date,
+			de.node_id1, 
+			de.node_type_1, 
+			COALESCE( de.country_code_1a, de.country_code_1b, de.country_code_1c )country_code_1,
+			de.rel_type,
+			de.node_id2, 
+			de.node_type_2, 
+			COALESCE( de.country_code_2a, de.country_code_2b, de.country_code_2c )country_code_2,
+			de.includes_entity, 
+			de.includes_officer, 
+			de.includes_intermediary, 
+			de.weight
+		FROM Date_Edge de JOIN a ON( de.node_id2 = a.node_id1 and de.date = a.date )
+		WHERE
+			de.includes_officer IN( false, ' || p_incl_officer::boolean || ' )
+		AND	de.includes_intermediary IN( false, ' || p_incl_intermediary::boolean || ' )
+	)
+	SELECT distinct
+		COALESCE( e1.name, o1.name, i1.name ) node1_name,
+		COALESCE( e2.name, o2.name, i2.name ) node2_name,
+		a.rel_type,
+		a.date,
+		a.node_id1,
+		a.node_type_1,
+		a.country_code_1,
+		g1.country AS country_1,
+		g1.longitude_average::text AS x1,
+		g1.latitude_average::text AS y1,
+		a.node_id2,
+		a.node_type_2,
+		a.country_code_2,
+		g2.country AS country_2,
+		g2.longitude_average::text AS x2,
+		g2.latitude_average::text AS y2,
+		a.includes_entity, 
+		a.includes_officer, 
+		a.includes_intermediary, 
+		a.weight
+	FROM a
+		LEFT JOIN Entity e1 ON( e1.node_id = a.node_id1 AND a.node_type_1 = ''entity'' )
+		LEFT JOIN Officer o1 ON( o1.node_id = a.node_id1  AND a.node_type_1 = ''officer'' )
+		LEFT JOIN Intermediary i1 ON( i1.node_id = a.node_id1 AND a.node_type_1 = ''intermediary'' )
+		LEFT JOIN Entity e2 ON( e2.node_id = a.node_id2  AND a.node_type_2 = ''entity'' )
+		LEFT JOIN Officer o2 ON( o2.node_id = a.node_id2  AND a.node_type_2 = ''officer'' )
+		LEFT JOIN Intermediary i2 ON( i2.node_id = a.node_id2 AND a.node_type_2 = ''intermediary'' )
+		LEFT JOIN country_geos g1 ON( a.country_code_1 = g1.alpha_3_code )
+		LEFT JOIN country_geos g2 ON( a.country_code_2 = g2.alpha_3_code )
+	LIMIT ' || p_limit::INT || '
+	';
+END;
+$$ language plpgsql;

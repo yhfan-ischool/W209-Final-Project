@@ -1,0 +1,98 @@
+-- SELECT * FROM edges_by_entity( '2013-12-01', 10019177, true, true, 3 );
+drop FUNCTION edges_by_entity ( p_d DATE, p_node_id INT, p_incl_officer BOOLEAN, p_incl_intermediary BOOLEAN, p_max_recursions INT );
+create or replace FUNCTION edges_by_entity (
+	p_d DATE,
+	p_node_id INT,
+	p_incl_officer BOOLEAN, 
+	p_incl_intermediary BOOLEAN, 
+	p_max_recursions INT 
+) returns table( 
+	depth INT,
+	node1_name text,
+	node2_name text,
+	rel_type varchar(100),
+	date date,
+	node_id1 int,
+	node_type_1 varchar(20),
+	country_code_1 char(3),
+	node_id2 int,
+	node_type_2 varchar(20),
+	country_code_2 char(3),
+	includes_entity boolean, 
+	includes_officer boolean, 
+	includes_intermediary boolean, 
+	weight int
+)
+AS $$
+BEGIN
+	return query execute
+	'
+	WITH RECURSIVE a AS (
+		SELECT 
+			1::INT AS depth,
+			date,
+			node_id1, 
+			node_type_1,
+			COALESCE( country_code_1a, country_code_1b, country_code_1c )country_code_1,
+			rel_type,
+			node_id2, 
+			node_type_2, 
+			COALESCE( country_code_2a, country_code_2b, country_code_2c )country_code_2,
+			includes_entity, 
+			includes_officer, 
+			includes_intermediary, 
+			weight
+		FROM Date_Edge 
+		WHERE
+			date = ''' || p_d::date || '''
+		AND node_type_1 = ''entity'' 
+		AND	node_id1 = ' || p_node_id::INT || '
+		UNION 
+		SELECT 
+			a.depth + 1,
+			de.date,
+			de.node_id1, 
+			de.node_type_1, 
+			COALESCE( de.country_code_1a, de.country_code_1b, de.country_code_1c )country_code_1,
+			de.rel_type,
+			de.node_id2, 
+			de.node_type_2, 
+			COALESCE( de.country_code_2a, de.country_code_2b, de.country_code_2c )country_code_2,
+			de.includes_entity, 
+			de.includes_officer, 
+			de.includes_intermediary, 
+			de.weight
+		FROM Date_Edge de JOIN a ON( ( ( de.node_id2 = a.node_id1 ) OR ( de.node_id1 = a.node_id2 ) ) AND de.date = a.date )
+		WHERE
+			a.depth <= ' || p_max_recursions::INT || '
+		AND (
+			de.includes_officer = ' || p_incl_officer::boolean || ' OR
+			de.includes_intermediary = ' || p_incl_intermediary::boolean || ' 
+		)	
+
+	)
+	SELECT distinct
+		a.depth,
+		COALESCE( e1.name, o1.name, i1.name ) node1_name,
+		COALESCE( e2.name, o2.name, i2.name ) node2_name,
+		a.rel_type,
+		a.date,
+		a.node_id1,
+		a.node_type_1,
+		a.country_code_1,
+		a.node_id2,
+		a.node_type_2,
+		a.country_code_2,
+		a.includes_entity, 
+		a.includes_officer, 
+		a.includes_intermediary, 
+		a.weight
+	FROM a
+		LEFT JOIN Entity e1 ON( e1.node_id = a.node_id1 AND a.node_type_1 = ''entity'' )
+		LEFT JOIN Officer o1 ON( o1.node_id = a.node_id1  AND a.node_type_1 = ''officer'' )
+		LEFT JOIN Intermediary i1 ON( i1.node_id = a.node_id1 AND a.node_type_1 = ''intermediary'' )
+		LEFT JOIN Entity e2 ON( e2.node_id = a.node_id2  AND a.node_type_2 = ''entity'' )
+		LEFT JOIN Officer o2 ON( o2.node_id = a.node_id2  AND a.node_type_2 = ''officer'' )
+		LEFT JOIN Intermediary i2 ON( i2.node_id = a.node_id2 AND a.node_type_2 = ''intermediary'' );';
+END;
+$$ language plpgsql;

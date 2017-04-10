@@ -1,0 +1,7 @@
+CREATE NONCLUSTERED INDEX IX_date_edge ON [dbo].[date_edge] (date, node_id1, country_code_1a, country_code_1b, country_code_1c )
+CREATE NONCLUSTERED INDEX IX_date_edge_1 ON [dbo].[date_edge]( date, node_id2 )
+CREATE NONCLUSTERED INDEX IX_date_edge_2 ON [dbo].[date_edge] ( node_id1, node_id2,	rel_type )
+
+psql -d panama_papers -U postgres -c "COPY date_edge FROM 'C:\Users\Michael\Desktop\date_edge_1979.csv' delimiter ',' csv HEADER;"
+psql -d panama_papers -U postgres -c "SELECT * FROM edges_all_countries( '2013-12-01', 1, 1, 1000000 );"
+psql -d panama_papers -U postgres -f "C:\Users\Michael\Desktop\edges_all_countries.txt"
