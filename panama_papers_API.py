@@ -198,6 +198,39 @@ def get_edges_by_nonentity(selected_date, node_id, incl_entities, incl_officers,
 def get_edges_by_nonentity_json(selected_date, node_id, incl_entities, incl_officers, incl_intermediaries, max_recursions):	
 	return jsonify(get_edges_by_nonentity(selected_date, node_id, incl_entities, incl_officers, incl_intermediaries, max_recursions))
 	
+
+# ---------------------------
+# GET Edges_By_NonEntity
+# ---------------------------
+# use this URI for calling the function from jQuery
+# http://127.0.0.1:8080/connection_counts/
+@app.route('/connection_counts/', methods=['GET'])
+def get_connection_counts():	
+	conn = e.connect()
+	query_string = "SELECT * FROM connection_counts ORDER BY date;"
+	print "\n%s" % query_string
+	query = conn.execute(query_string)
+	
+	results = []
+	for r in query.cursor.fetchall():
+		record = { "date": str(r[0]),
+			"includes_entity": str(r[1]),
+			"includes_officer": str(r[2]),
+			"includes_intermediary": str(r[3]),
+			"total": str(r[4])
+		}
+		results.append(record)
+		
+	print "results count: %d\n" % len(results)
+	return results
+	
+# http://127.0.0.1:8080/connection_counts_json/
+@app.route('/connection_counts_json/', methods=['GET'])
+def get_connection_counts_json():	
+	return jsonify(get_connection_counts())
+	
+	
+
 # ---------------------------
 if __name__=='__main__':
 	test_con = e.connect()
@@ -205,6 +238,5 @@ if __name__=='__main__':
 	test_result = test_con.execute(test_query)
 	print test_result.cursor.fetchall()
 	port = int(os.environ.get("PORT", 8080))
-	app.run(debug=True)
-	#app.run(host='0.0.0.0', port=port, debug=True)
+	app.run(host='0.0.0.0', port=port, debug=True)
 	
