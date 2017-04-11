@@ -35,11 +35,11 @@ $(function(){
 
 	var width = Math.max(960, window.innerWidth),
 		height = Math.max(500, 0.4752 * width),
-		startColor = "#ff3399",
-		endColor = "#ffcc00",
-		linkColor = "#99ff33",
+		startColor = "#8856A7",
+		endColor = "#FFCC00",
+		linkColor = "#F9FFF3",
 		dateSliderWidth = Math.round(width * 0.8),
-		dateSliderHeight = 50,
+		dateSliderHeight = 150,
 		mapWidth = width,
 		mapHeight = height,
 		prefix = prefixMatch(["webkit", "ms", "Moz", "O"]);
@@ -89,23 +89,33 @@ $(function(){
 
 	var maxDate = maxDate || new Date(0);
 	var minDate = minDate || new Date();
+	var maxConnection = 0;
+	var maxConnectionDate = new Date(0);
 	var selectedDate = selectedDate || new Date('2016-12-01');
 
 	if (window.connectionCountArray.length == 0)
-		d3.csv('connection_count.csv', function(data) {
+		d3.csv('data/connection_count.csv', function(data) {
 			data.forEach(function(v) {
 				var monthStartDate = new Date(v.date);
 				maxDate = (monthStartDate > maxDate) ? monthStartDate : maxDate;
 				minDate = (monthStartDate < minDate) ? monthStartDate : minDate;
+				var e = parseInt(v.includes_entity),
+				    o = parseInt(v.includes_officer),
+				    i = parseInt(v.includes_intermediary);
+				var s = e + o + i;
+				if (s > maxConnection) {
+					maxConnection = s;
+					maxConnectionDate = monthStartDate
+				}
 				window.connectionCountArray.push({
 					monthDate: monthStartDate,
-					includesEntity: parseInt(v.includes_entity),
-					includesOfficer: parseInt(v.includes_officer),
-					includesIntermediary: parseInt(v.includes_intermediary),
-					total: parseInt(v.includes_entity) + parseInt(v.includes_officer) + parseInt(v.includes_intermediary)
+					includesEntity: e,
+					includesOfficer: o,
+					includesIntermediary: i,
+					total: s
 				});
 			});
-			selectedDate = maxDate;
+			selectedDate = maxConnectionDate;
 			setUpDateSlider(minDate, maxDate);
 		});
 
@@ -172,13 +182,95 @@ $(function(){
 		    .attr("class", "slider-x axis")
 		    .attr("transform", "translate(0," + sliderHeightOffset + ")")
 		    .call(d3.svg.axis()
-			.scale(window.sliderX)
-			.orient("bottom")
-			.ticks(d3.time.years)
-			.tickFormat(d3.time.format("%Y")))
+					.scale(window.sliderX)
+					.orient("bottom")
+					.ticks(d3.time.years)
+					.tickFormat(d3.time.format("%Y")))
 			.select(".domain")
 			.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
 		    .attr("class", "halo");
+
+        // Bar chart of the connection count on the date slider
+        var barColors = [ ['Intermediary', "#A1D99B"], ['Officer', "#FC9272"], ['Entity', "#A6BDDB"] ];
+
+		// * Includes Intermediary
+		sliderPanel.selectAll("rect.intermediary-bars")
+		           .data(window.connectionCountArray)
+		           .enter()
+		           .append("rect")
+		           .style("fill", barColors[0][1])
+		           .attr("class", "intermediary-bars")
+		           .attr("height", function(d) { return (d.includesEntity + d.includesOfficer + d.includesIntermediary) / 10000.0; })
+		           .attr("width", 1.0 * dateSliderWidth / window.connectionCountArray.length)
+                   .attr("x", function(d) { return window.sliderX(d.monthDate); })
+                   .attr("y", function(d) { return sliderHeightOffset - (d.includesEntity + d.includesOfficer + d.includesIntermediary) / 10000.0; });
+		// * Includes Officer
+		sliderPanel.selectAll("rect.officer-bars")
+		           .data(window.connectionCountArray)
+		           .enter()
+		           .append("rect")
+		           .style("fill", barColors[1][1])
+		           .attr("class", "officer-bars")
+		           .attr("height", function(d) { return (d.includesEntity + d.includesOfficer) / 10000.0; })
+		           .attr("width", 1.0 * dateSliderWidth / window.connectionCountArray.length)
+                   .attr("x", function(d) { return window.sliderX(d.monthDate); })
+                   .attr("y", function(d) { return sliderHeightOffset - (d.includesEntity + d.includesOfficer) / 10000.0; });
+		// * Includes Entity
+		sliderPanel.selectAll("rect.entity-bars")
+		           .data(window.connectionCountArray)
+		           .enter()
+		           .append("rect")
+		           .style("fill", barColors[2][1])
+		           .attr("class", "entity-bars")
+		           .attr("height", function(d) { return d.includesEntity / 10000.0; })
+		           .attr("width", 1.0 * dateSliderWidth / window.connectionCountArray.length)
+                   .attr("x", function(d) { return window.sliderX(d.monthDate); })
+                   .attr("y", function(d) { return sliderHeightOffset - d.includesEntity / 10000.0; });
+
+		// Date (month) having the most connections
+		var maxConnectionBar = sliderPanel.selectAll("rect.max-connection-bar")
+    							          .data([{ maxConnection: maxConnection, maxConnectionDate: maxConnectionDate }])
+								          .enter()
+								          .append("rect")
+								          .style("fill", "#FF0000")
+								          .attr("class", "max-connection-bar")
+								          .attr("height", function(d) { return d.maxConnection / 10000.0; })
+								          .attr("width", 1.0 * dateSliderWidth / window.connectionCountArray.length)
+						                  .attr("x", function(d) { return window.sliderX(d.maxConnectionDate); })
+						                  .attr("y", function(d) { return sliderHeightOffset - d.maxConnection / 10000.0; });
+		sliderPanel.append("text")
+		           .attr("x", window.sliderX(maxConnectionDate))
+		           .attr("y", sliderHeightOffset - 20 - maxConnection / 10000.0)
+		           .attr("dy", "1em")
+		           .text(maxConnection);
+
+		var legend = sliderPanel.append("g")
+								.attr("class", "legend")
+								.attr("x", 0)
+								.attr("y", 25)
+								.attr("height", 80)
+								.attr("width",100);
+
+		legend.selectAll("g")
+		      .data(barColors)
+		      .enter()
+		      .append("g")
+		      .each(function(d, i) {
+					  var g = d3.select(this);
+					  g.append("rect")
+					   .attr("x", 0)
+					   .attr("y", i * 20 + 10)
+					   .attr("width", 8)
+					   .attr("height", 8)
+					   .style("fill", d[1]);
+					  g.append("text")
+					   .attr("x", 12)
+					   .attr("y", i * 20 + 18)
+					   .attr("height", 20)
+					   .attr("width", 100)
+					   .style("fill", d[1])
+					   .text(d[0]);
+					});
 
 		window.slider = sliderPanel.append("g")
 		    .attr("class", "date-slider")
@@ -193,7 +285,10 @@ $(function(){
 		window.dateSliderHandle = slider.append("circle")
 		    .attr("class", "date-slider-handle")
 		    .attr("transform", "translate(0," + sliderHeightOffset + ")")
-		    .attr("r", 9);
+		    .attr("r", 4)
+		    .style("stroke", "#707070")
+		    .style("stroke-width", 2)
+		    .style("fill", "#FFEDA0");
 
 		// Slider handlers
 		var brushTimer;
