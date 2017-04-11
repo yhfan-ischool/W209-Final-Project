@@ -15,11 +15,13 @@ $(function(){
 		advanceToDetailView()
 	});
 	
+	// this event fires whenenver one of the checkboxes is filled
 	$("input[type='checkbox']").change(function(){
 		if(this.id!='chk_entity'){
 			officer_selected = $("#chk-officer").is(":checked");
 			intermediary_selected = $("#chk-intermediary").is(":checked");
-			alert("Officer selected: "+ officer_selected + ", Intermediary_selected: " + intermediary_selected );
+			
+			alert("Officer selected: "+ officer_selected + ",\nIntermediary_selected: " + intermediary_selected );
 		}
 	});
 
