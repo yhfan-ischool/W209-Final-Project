@@ -1,13 +1,13 @@
 function afterSlide(view) {
 	console.log( "slidr in:", view );
 	if( view == 'one'){
-		$("#date-slider").slideUp();
+		$("#date-slider-container").slideUp();
 		globalSlidr.controls('none');
 	}else{
-		$("#date-slider").slideDown();;
+		$("#date-slider-container").slideDown();;
 		globalSlidr.controls('border');
 	}
-	console.log( "slidr in:", $("#date-slider").css("display") );
+	console.log( "slidr in display:", $("#date-slider-container").css("display") );
 }
 
 function beforeSlide(view) {

@@ -1,5 +1,5 @@
 $(function(){
-	$("#date-slider").css("display", "block").hide();
+	$("#date-slider-container").css("display", "block").hide();
 	$(window).on("load", function () {
 		setElementWidth("load");
 	});
@@ -14,26 +14,15 @@ $(function(){
 	$("#dialog-code").click(function(){
 		advanceToDetailView()
 	});
-
-	/*
-	$("#connection-selector").click(function(){
-		alert('foo!');
-	});
-
-	$( "#connection-selector" ).mouseover(function() {
-		console.log('foo');
-		$("#connection-selector")
-			.css("text-decoration", "underline")
-			.css("cursor", "pointer");
-	});
 	
-	$("#connection-selector").mouseout(function(){
-		console.log('bar');
-		$("#connection-selector")
-			.css("text-decoration", "none")
-			.css("cursor", "normal");
+	$("input[type='checkbox']").change(function(){
+		if(this.id!='chk_entity'){
+			officer_selected = $("#chk-officer").is(":checked");
+			intermediary_selected = $("#chk-intermediary").is(":checked");
+			alert("Officer selected: "+ officer_selected + ", Intermediary_selected: " + intermediary_selected );
+		}
 	});
-	*/
+
 	
 	$("#dialog").hide();
 
@@ -58,7 +47,7 @@ $(function(){
 		endColor = "#FFCC00",
 		linkColor = "#F9FFF3",
 		dateSliderWidth = Math.round(width * 0.8),
-		dateSliderHeight = 150,
+		dateSliderHeight = 120,
 		mapWidth = width,
 		mapHeight = height,
 		prefix = prefixMatch(["webkit", "ms", "Moz", "O"]);
@@ -270,6 +259,7 @@ $(function(){
 								.attr("height", 80)
 								.attr("width",100);
 
+		/*
 		legend.selectAll("g")
 		      .data(barColors)
 		      .enter()
@@ -290,7 +280,7 @@ $(function(){
 					   .style("fill", d[1])
 					   .text(d[0]);
 					});
-
+		*/
 		window.slider = sliderPanel.append("g")
 		    .attr("class", "date-slider")
 		    .call(dateBrush);

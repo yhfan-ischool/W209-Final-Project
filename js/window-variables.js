@@ -3,6 +3,7 @@ window.sliderX = null;
 window.sliderPanel = null;
 window.dateBrush = null;
 window.dateSliderHandle = null;
+window.connectionSelectorPanel = null;
 window.apiEndPoints = [
   'edges_all_countries_json',
   'edges_by_country_json',

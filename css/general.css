@@ -10,3 +10,35 @@ img.clip-path{
 	margin-bottom:4px;
 }
 
+#slidr-map,
+#date-slider,
+#date-slider-container{ 
+	margin:0 !important;
+	padding:0 !important;
+}
+#connection-selector-panel{
+	margin:0 !important;
+	padding-top:4px;
+	background-color: #f4f6f6;
+	text-align:center;
+}
+
+/* var barColors = [ ['Intermediary', "#A1D99B"], ['Officer', "#FC9272"], ['Entity', "#A6BDDB"] ]; */
+input[type=checkbox] + label{
+	color:red;
+	padding-left:4px;
+	padding-right:10px;
+}
+#chk-intermediary + label{
+	color:#A1D99B;
+}
+#chk-officer + label{
+	color:#FC9272;
+}
+#chk-entity + label{
+	color:#A6BDDB;
+	/*pointer-events:none;*/
+}
+#chk-entity{
+	pointer-events:none
+}

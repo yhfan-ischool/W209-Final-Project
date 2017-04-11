@@ -41,7 +41,6 @@ body {
   height: 256px;
 }
 
-#connection-selector,
 #selected-date {
   z-index: 2;
   position: absolute;
@@ -53,12 +52,6 @@ body {
   text-align: center;
   color:  #2e4053;
   background-color:transparent;
-}
-#connection-selector{
-	text-align: none;
-	color: #5d6d7e;
-	width:200px;
-	left:105px;
 }
 
 .edge {
