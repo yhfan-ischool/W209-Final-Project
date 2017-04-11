@@ -15,7 +15,26 @@ $(function(){
 		advanceToDetailView()
 	});
 
+	/*
+	$("#connection-selector").click(function(){
+		alert('foo!');
+	});
 
+	$( "#connection-selector" ).mouseover(function() {
+		console.log('foo');
+		$("#connection-selector")
+			.css("text-decoration", "underline")
+			.css("cursor", "pointer");
+	});
+	
+	$("#connection-selector").mouseout(function(){
+		console.log('bar');
+		$("#connection-selector")
+			.css("text-decoration", "none")
+			.css("cursor", "normal");
+	});
+	*/
+	
 	$("#dialog").hide();
 
 	function setElementWidth(desc){
@@ -67,7 +86,7 @@ $(function(){
 
 	// Selected Date layer
 	var selectedDateLayer = map.append("div")
-		.attr("class", "selected-date")
+		.attr("id", "selected-date")
 		.style("left", ((width - 100) / 2) + "px");
 
 	// Data layer
@@ -330,7 +349,9 @@ $(function(){
 
 	function updateMap( value ) {
 		selectedDate = value;
-		selectedDateLayer.style("left", (width - 100) / 2).html(d3.time.format("%b %Y")(selectedDate));
+		selectedDateLayer
+			.style("left", (width - 100) / 2)
+			.html(d3.time.format("%b %Y")(selectedDate));
 		var url = requestUrl(window.apiEndPoints[0], selectedDate, null, null, true, true, null);
 		fetchData(url, function( data ) {
 			dataArray = data;

@@ -41,16 +41,24 @@ body {
   height: 256px;
 }
 
-.selected-date {
+#connection-selector,
+#selected-date {
   z-index: 2;
   position: absolute;
   pointer-events: none;
   width: 100px;
   height: 20px;
   bottom: 3px;
-  background: #FFFFFF;
   font-weight: bold;
   text-align: center;
+  color:  #2e4053;
+  background-color:transparent;
+}
+#connection-selector{
+	text-align: none;
+	color: #5d6d7e;
+	width:200px;
+	left:105px;
 }
 
 .edge {
