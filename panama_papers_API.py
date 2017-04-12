@@ -27,11 +27,11 @@ def index():
 # GET Edges_All_Countries	
 # ---------------------------
 # use this URI for calling the function from jQuery
-# http://127.0.0.1:8080/edges_all_countries/2013-12-01/incl_officers/true/incl_intermediaries/true
-@app.route('/edges_all_countries/<selected_date>/incl_officers/<incl_officers>/incl_intermediaries/<incl_intermediaries>/', methods=['GET'])
-def get_edges_all_countries(selected_date, incl_officers, incl_intermediaries):
+# http://127.0.0.1:8080/edges_all_countries/2013-12-01/
+@app.route('/edges_all_countries/<selected_date>/', methods=['GET'])
+def get_edges_all_countries(selected_date):
 	conn = e.connect()
-	query_string = "SELECT * FROM edges_all_countries( '" + selected_date + "', " + incl_officers + ", " + incl_intermediaries + ", 1000000 ) WHERE country_code_1 IS NOT NULL AND country_code_2 IS NOT NULL AND x1 IS NOT NULL AND x2 IS NOT NULL;"
+	query_string = "SELECT * FROM edges_all_countries( '" + selected_date + "', 1000000 );"
 	print "\n%s" % query_string
 	query = conn.execute(query_string)
 	
@@ -64,10 +64,10 @@ def get_edges_all_countries(selected_date, incl_officers, incl_intermediaries):
 	return results
 
 # use this URI for viewing the results in a browser
-# http://127.0.0.1:8080/edges_all_countries_json/2013-12-01/incl_officers/true/incl_intermediaries/true
-@app.route('/edges_all_countries_json/<selected_date>/incl_officers/<incl_officers>/incl_intermediaries/<incl_intermediaries>/', methods=['GET'])
-def get_edges_all_countries_json(selected_date, incl_officers, incl_intermediaries):
-	return jsonify(get_edges_all_countries(selected_date, incl_officers, incl_intermediaries))
+# http://127.0.0.1:8080/edges_all_countries_json/2013-12-01/
+@app.route('/edges_all_countries_json/<selected_date>/', methods=['GET'])
+def get_edges_all_countries_json(selected_date):
+	return jsonify(get_edges_all_countries(selected_date))
 
 	
 # ---------------------------

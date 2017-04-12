@@ -1,9 +1,7 @@
--- SELECT * FROM edges_all_countries( '2013-12-01', true, true, 1000000 );
-drop FUNCTION edges_all_countries ( p_d DATE, p_incl_officer BOOLEAN, p_incl_intermediary BOOLEAN, p_limit INT );
+-- SELECT * FROM edges_all_countries( '2013-12-01', 1000000 );
+drop FUNCTION edges_all_countries ( p_d DATE, p_limit INT );
 create or replace FUNCTION edges_all_countries (
 	p_d DATE, 
-	p_incl_officer BOOLEAN, 
-	p_incl_intermediary BOOLEAN,
 	p_limit INT
 ) returns table( 
 	node1_name text,
@@ -63,9 +61,6 @@ BEGIN
 			de.includes_intermediary, 
 			de.weight
 		FROM Date_Edge de JOIN a ON( de.node_id2 = a.node_id1 and de.date = a.date )
-		WHERE
-			de.includes_officer IN( false, ' || p_incl_officer::boolean || ' )
-		AND	de.includes_intermediary IN( false, ' || p_incl_intermediary::boolean || ' )
 	)
 	SELECT distinct
 		COALESCE( e1.name, o1.name, i1.name ) node1_name,
@@ -97,6 +92,11 @@ BEGIN
 		LEFT JOIN Intermediary i2 ON( i2.node_id = a.node_id2 AND a.node_type_2 = ''intermediary'' )
 		LEFT JOIN country_geos g1 ON( a.country_code_1 = g1.alpha_3_code )
 		LEFT JOIN country_geos g2 ON( a.country_code_2 = g2.alpha_3_code )
+	WHERE 
+		a.country_code_1 IS NOT NULL 
+	AND a.country_code_2 IS NOT NULL 
+	AND g1.longitude_average IS NOT NULL 
+	AND g2.longitude_average IS NOT NULL
 	LIMIT ' || p_limit::INT || '
 	';
 END;

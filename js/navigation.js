@@ -20,7 +20,8 @@ function circleClick(el,codeType ){
 	
 	$("#dialog-title").text(codeType);
 	$("#dialog-code").text('Click on the code: ' + code);
-	$("#network-view-data").text( codeType + ' Placeholder: ' + code )
+	$("#network-view").text( codeType + ' Placeholder: ' + code )
+	drawGraph(code, 'country_code');
 	$("#myModal").modal();
 }
 

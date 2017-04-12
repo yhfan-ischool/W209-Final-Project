@@ -39,7 +39,7 @@ $(function(){
 			"background-color": "#dfe5ac",
 			"font-size":"16px"
 		};
-		$("#network-view-data").css(styles);
+		$("#network-view").css(styles);
 	}
 
 
@@ -101,7 +101,7 @@ $(function(){
 	var minDate = minDate || new Date();
 	var maxConnection = 0;
 	var maxConnectionDate = new Date(0);
-	var selectedDate = selectedDate || new Date('2016-12-01');
+	window.selectedDate = window.selectedDate || new Date('2016-12-01');
 
 	if (window.connectionCountArray.length == 0)
 		d3.csv('data/connection_count.csv', function(data) {
@@ -125,54 +125,17 @@ $(function(){
 					total: s
 				});
 			});
-			selectedDate = maxConnectionDate;
+			window.selectedDate = maxConnectionDate;
 			setUpDateSlider(minDate, maxDate);
 		});
 
-	var selectedDateString = function(date) { return d3.time.format("%Y-%m-01")(date); }
-
 	console.log("spinner", "on");
 	document.getElementById("loader").style.display = "block";
-	var baseUrl = '//localhost:8080';
+	
 
-	// Each of the following paths will be set based on the combination of selections made
-	// on the page, which can be either the map view or the detail view.
-
-	var apiPath = function(endPoint, date) {
-		return '/' + endPoint + '/' + selectedDateString(date);
-	}
-	var edgeTypePath = function(nodeId = null, countryCode = null) {
-		// TODO: edgeTypePath will look like /nodeid/12345 when a specific node is selected
-		//       or /countrycode/PAN when a specific country is selected
-		return '';
-	}
-	var nodeTypePath = function(includesOfficers = true, includesIntermediaries = true) {
-		// TODO: true/false will be set based on selected checkboxes
-		return '/incl_officers/' +
-		       (includesOfficers == true ? 'true' : 'false') +
-		       '/incl_intermediaries/' +
-		       (includesIntermediaries == true ? 'true' : 'false');
-	}
-	var depthPath = function(depth = null) {
-		// TODO: depthPath will look like /maxrecursions/5 when an API endpoint other than
-		//       /edges_all_countries_json is called
-		return '';
-	}
-
-
-	var requestUrl = function(endPoint, date, nodeId = null, countryCode = null, includesOfficers = true, includesIntermediaries = true, depth = null) {
-		return baseUrl +
-		apiPath(endPoint, date) +
-		edgeTypePath(nodeId, countryCode) +
-		nodeTypePath(includesOfficers, includesIntermediaries) +
-		depthPath(depth);
-	}
 	var dataArray = [];
 
 	// Data galore!
-	function fetchData(apiUrl, callbackFunction) {
-		$.getJSON(apiUrl, callbackFunction);
-	}
 
 	function setUpDateSlider(minDate, maxDate) {
 		// setup our brush as slider for date selection
@@ -261,28 +224,6 @@ $(function(){
 								.attr("height", 80)
 								.attr("width",100);
 
-		/*
-		legend.selectAll("g")
-		      .data(barColors)
-		      .enter()
-		      .append("g")
-		      .each(function(d, i) {
-					  var g = d3.select(this);
-					  g.append("rect")
-					   .attr("x", 0)
-					   .attr("y", i * 20 + 10)
-					   .attr("width", 8)
-					   .attr("height", 8)
-					   .style("fill", d[1]);
-					  g.append("text")
-					   .attr("x", 12)
-					   .attr("y", i * 20 + 18)
-					   .attr("height", 20)
-					   .attr("width", 100)
-					   .style("fill", d[1])
-					   .text(d[0]);
-					});
-		*/
 		window.slider = sliderPanel.append("g")
 		    .attr("class", "date-slider")
 		    .call(dateBrush);
@@ -340,11 +281,12 @@ $(function(){
 	}
 
 	function updateMap( value ) {
-		selectedDate = value;
+		window.selectedDate = value;
 		selectedDateLayer
 			.style("left", (width - 100) / 2)
-			.html(d3.time.format("%b %Y")(selectedDate));
-		var url = requestUrl(window.apiEndPoints[0], selectedDate, null, null, true, true, null);
+			.html(d3.time.format("%b %Y")(window.selectedDate));
+
+		var url = requestUrl(window.apiEndPoints["all"], window.selectedDate, null, null, true, true, null);
 		fetchData(url, function( data ) {
 			dataArray = data;
 			zoomed();
@@ -352,7 +294,8 @@ $(function(){
 	}
 
 	// Initial data fetch on load.
-	var initialRequestUrl = requestUrl(window.apiEndPoints[0], selectedDate, null, null, true, true, null);
+	var initialRequestUrl = requestUrl(window.apiEndPoints["all"], window.selectedDate, null, null, true, true, null);
+	console.log( "initialRequestUrl: ", initialRequestUrl );
 	fetchData(initialRequestUrl, function( data ) {
 		dataArray = data;
 
@@ -360,8 +303,8 @@ $(function(){
 		console.log("spinner", "off");
 		zoomed();
 
-		window.dateSliderHandle.attr("cx", window.sliderX(selectedDate));
-		updateMap(selectedDate);
+		window.dateSliderHandle.attr("cx", window.sliderX(window.selectedDate));
+		updateMap(window.selectedDate);
 	});
 
 	setElementWidth("ready");
@@ -496,3 +439,26 @@ $(function(){
 		return "";
 	}
 });
+
+function requestUrl (endPoint, date, nodeId = null, countryCode = null, includesOfficers = true, includesIntermediaries = true, depth = null) {
+	var selectedDateString = d3.time.format("%Y-%m-01")(date);
+	console.log( "selectedDateString: ", selectedDateString );
+	if( nodeId == null ) { node_id='0'; }
+	if( countryCode == null ){ countryCode = ''; }
+	if( includesOfficers == null ) { includesOfficers = false; }
+	if( includesIntermediaries == null ) { includesIntermediaries = false; }
+	if( depth == null ) { depth = 3; }
+	var url= '//localhost:8080/' + endPoint.replace( "%selected_date%", selectedDateString )
+										   .replace( "%node_id", nodeId )
+										   .replace( "%country_code%", countryCode )
+										   .replace( "%incl_officers%", (includesOfficers == true ? 'true' : 'false') )
+										   .replace( "%incl_intermediaries%", (includesIntermediaries == true ? 'true' : 'false') )
+										   .replace( "%max_recursions%", depth );
+	console.log( "requestUrl: ",  url );
+	return url;
+}
+
+function fetchData(apiUrl, callbackFunction) {
+	console.log( "fetchData: ", apiUrl );
+	$.getJSON(apiUrl, callbackFunction);	
+}
