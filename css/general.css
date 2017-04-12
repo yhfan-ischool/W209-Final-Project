@@ -29,10 +29,10 @@ input[type=checkbox] + label{
 	padding-left:4px;
 	padding-right:10px;
 }
-#chk-intermediary + label{
+#chk-officer + label{
 	color:#A1D99B;
 }
-#chk-officer + label{
+#chk-intermediary + label{
 	color:#FC9272;
 }
 #chk-entity + label{
@@ -41,4 +41,33 @@ input[type=checkbox] + label{
 }
 #chk-entity{
 	pointer-events:none
+}
+
+/* Detail view */
+
+.hive-axis {
+	  stroke: #000;
+	  stroke-width: 1.5px;
+}
+
+.hive-node circle {
+	  stroke: #000;
+}
+
+.hive-node circle.active {
+	  stroke: red;
+	  stroke-width: 3px;
+}
+
+.hive-link {
+	  fill: none;
+	  stroke: #999;
+	  stroke-width: 1.5px;
+	  stroke-opacity: .3;
+}
+
+.hive-link.active {
+	  stroke: red;
+	  stroke-width: 2px;
+	  stroke-opacity: 1;
 }

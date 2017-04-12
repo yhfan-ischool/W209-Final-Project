@@ -48,7 +48,7 @@ $(function(){
 		startColor = "#8856A7",
 		endColor = "#FFCC00",
 		linkColor = "#F9FFF3",
-		dateSliderWidth = Math.round(width * 0.8),
+		dateSliderWidth = Math.round(width * 0.9),
 		dateSliderHeight = 120,
 		mapWidth = width,
 		mapHeight = height,
@@ -62,7 +62,7 @@ $(function(){
 	var zoom = d3.behavior.zoom()
 		.scale(1 << 11)
 		.scaleExtent([1 << 9, 1 << 23])
-		.translate([mapWidth / 2, mapHeight / 2])
+		.translate([mapWidth / 2, mapHeight / 2 + mapHeight / 4])
 		.on("zoom", zoomed);
 
 	var map = d3.select("#data-map").append("div")
@@ -164,30 +164,30 @@ $(function(){
 		    .attr("class", "halo");
 
         // Bar chart of the connection count on the date slider
-        var barColors = [ ['Intermediary', "#A1D99B"], ['Officer', "#FC9272"], ['Entity', "#A6BDDB"] ];
+        var barColors = [ ['Officer', "#A1D99B"], ['Intermediary', "#FC9272"], ['Entity', "#A6BDDB"] ];
 
-		// * Includes Intermediary
-		sliderPanel.selectAll("rect.intermediary-bars")
-		           .data(window.connectionCountArray)
-		           .enter()
-		           .append("rect")
-		           .style("fill", barColors[0][1])
-		           .attr("class", "intermediary-bars")
-		           .attr("height", function(d) { return (d.includesEntity + d.includesOfficer + d.includesIntermediary) / 10000.0; })
-		           .attr("width", 1.0 * dateSliderWidth / window.connectionCountArray.length)
-                   .attr("x", function(d) { return window.sliderX(d.monthDate); })
-                   .attr("y", function(d) { return sliderHeightOffset - (d.includesEntity + d.includesOfficer + d.includesIntermediary) / 10000.0; });
 		// * Includes Officer
 		sliderPanel.selectAll("rect.officer-bars")
 		           .data(window.connectionCountArray)
 		           .enter()
 		           .append("rect")
-		           .style("fill", barColors[1][1])
+		           .style("fill", barColors[0][1])
 		           .attr("class", "officer-bars")
-		           .attr("height", function(d) { return (d.includesEntity + d.includesOfficer) / 10000.0; })
+		           .attr("height", function(d) { return (d.includesEntity + d.includesIntermediary + d.includesOfficer) / 10000.0; })
 		           .attr("width", 1.0 * dateSliderWidth / window.connectionCountArray.length)
                    .attr("x", function(d) { return window.sliderX(d.monthDate); })
-                   .attr("y", function(d) { return sliderHeightOffset - (d.includesEntity + d.includesOfficer) / 10000.0; });
+                   .attr("y", function(d) { return sliderHeightOffset - (d.includesEntity + d.includesIntermediary + d.includesOfficer) / 10000.0; });
+		// * Includes Intermediary
+		sliderPanel.selectAll("rect.intermediary-bars")
+		           .data(window.connectionCountArray)
+		           .enter()
+		           .append("rect")
+		           .style("fill", barColors[1][1])
+		           .attr("class", "intermediary-bars")
+		           .attr("height", function(d) { return (d.includesEntity + d.includesIntermediary) / 10000.0; })
+		           .attr("width", 1.0 * dateSliderWidth / window.connectionCountArray.length)
+                   .attr("x", function(d) { return window.sliderX(d.monthDate); })
+                   .attr("y", function(d) { return sliderHeightOffset - (d.includesEntity + d.includesIntermediary) / 10000.0; });
 		// * Includes Entity
 		sliderPanel.selectAll("rect.entity-bars")
 		           .data(window.connectionCountArray)
@@ -205,7 +205,7 @@ $(function(){
     							          .data([{ maxConnection: maxConnection, maxConnectionDate: maxConnectionDate }])
 								          .enter()
 								          .append("rect")
-								          .style("fill", "#FF0000")
+								          .style("fill", "#ABABAB")
 								          .attr("class", "max-connection-bar")
 								          .attr("height", function(d) { return d.maxConnection / 10000.0; })
 								          .attr("width", 1.0 * dateSliderWidth / window.connectionCountArray.length)
@@ -215,6 +215,7 @@ $(function(){
 		           .attr("x", window.sliderX(maxConnectionDate))
 		           .attr("y", sliderHeightOffset - 20 - maxConnection / 10000.0)
 		           .attr("dy", "1em")
+		           .style("font-size", "0.8em")
 		           .text(maxConnection);
 
 		var legend = sliderPanel.append("g")

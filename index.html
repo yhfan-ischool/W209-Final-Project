@@ -11,6 +11,7 @@
     <script src="js/jquery-3.2.0.min.js"></script>
 		<script src="js/window-variables.js"></script>
 		<script src="js/on-initialization.js"></script>
+		<script src="js/hive.js"></script>
 		<script src="js/navigation.js"></script>
 		<script src="js/detailed-view.js"></script>
 		<script src="bootstrap/js/bootstrap.js"></script>
@@ -64,12 +65,14 @@
 			</div>
 			<div data-slidr="three">
 				<div id="network-view"></div>
+				<div id="network-view-data"></div>
+				<div id="network-view-data-debug"></div>
 			</div>
 		</div>
 		<div id="date-slider-container">
 			<div id="connection-selector-panel">
-				<input type="checkbox" id="chk-intermediary"><label for="chk-intermediary">Intermediary</label>
 				<input type="checkbox" id="chk-officer"><label for="chk-officer">Officer</label>
+				<input type="checkbox" id="chk-intermediary"><label for="chk-intermediary">Intermediary</label>
 				<input type="checkbox" id="chk-entity" checked ><label for="chk-entity">Entity</label>
 			</div>
 			<div id="date-slider"></div>
