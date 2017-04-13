@@ -1,4 +1,2 @@
 data_server_MR.py
 panama_papers_API_MR.py
-data/*.csv
-!data/connection_count.csv
