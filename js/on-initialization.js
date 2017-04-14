@@ -167,37 +167,45 @@ $(function(){
 					.tickFormat(d3.time.format("%Y")))
 			.select(".domain")
 			.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
-		    .attr("class", "halo")
-			.on("mouseover", function(){return dateSliderTooltip.style("visibility", "visible");})
-			.on("mousemove", function(){return dateSliderTooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");})
-			.on("mouseout", function(){return dateSliderTooltip.style("visibility", "hidden");});
+		    .attr("class", "halo");
 
         // Bar chart of the connection count on the date slider
         var barColors = [ ['Officer', "#A1D99B"], ['Intermediary', "#FC9272"], ['Entity', "#A6BDDB"] ];
 		
 			// * Includes Officer
-		sliderPanel.selectAll("rect.officer-bars")
-			.data(window.connectionCountArray)
-			.enter()
-			.append("rect")
-			.style("fill", barColors[0][1])
-			.attr("class", "officer-bars")
-			.attr("height", function(d) { return (d.includesEntity + d.includesIntermediary + d.includesOfficer) / 10000.0; })
-			.attr("width", 1.0 * dateSliderWidth / window.connectionCountArray.length)
-			.attr("x", function(d) { return window.sliderX(d.monthDate); })
-			.attr("y", function(d) { return sliderHeightOffset - (d.includesEntity + d.includesIntermediary + d.includesOfficer) / 10000.0; });
+		if(window.inclOfficers){
+			sliderPanel.selectAll("rect.officer-bars")
+				.data(window.connectionCountArray)
+				.enter()
+				.append("rect")
+				.style("fill", barColors[0][1])
+				.attr("class", "officer-bars")
+				.attr("height", function(d) { return (d.includesEntity + d.includesIntermediary + d.includesOfficer) / 10000.0; })
+				.attr("width", 1.0 * dateSliderWidth / window.connectionCountArray.length)
+				.attr("x", function(d) { return window.sliderX(d.monthDate); })
+				.attr("y", function(d) { return sliderHeightOffset - (d.includesEntity + d.includesIntermediary + d.includesOfficer) / 10000.0; })
+				.on("mouseover", function(){return dateSliderTooltip.style("visibility", "visible");})
+				.on("mousemove", function(){return dateSliderTooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");})
+				.on("mouseout", function(){return dateSliderTooltip.style("visibility", "hidden");});
+		}
 				   
 		// * Includes Intermediary
-		sliderPanel.selectAll("rect.intermediary-bars")
-			.data(window.connectionCountArray)
-			.enter()
-			.append("rect")
-			.style("fill", barColors[1][1])
-			.attr("class", "intermediary-bars")
-			.attr("height", function(d) { return (d.includesEntity + d.includesIntermediary) / 10000.0; })
-			.attr("width", 1.0 * dateSliderWidth / window.connectionCountArray.length)
-			.attr("x", function(d) { return window.sliderX(d.monthDate); })
-			.attr("y", function(d) { return sliderHeightOffset - (d.includesEntity + d.includesIntermediary) / 10000.0; });
+		if(window.inclIntermediaries){
+			sliderPanel.selectAll("rect.intermediary-bars")
+				.data(window.connectionCountArray)
+				.enter()
+				.append("rect")
+				.style("fill", barColors[1][1])
+				.attr("class", "intermediary-bars")
+				.attr("height", function(d) { return (d.includesEntity + d.includesIntermediary) / 10000.0; })
+				.attr("width", 1.0 * dateSliderWidth / window.connectionCountArray.length)
+				.attr("x", function(d) { return window.sliderX(d.monthDate); })
+				.attr("y", function(d) { return sliderHeightOffset - (d.includesEntity + d.includesIntermediary) / 10000.0; })
+				.on("mouseover", function(){return dateSliderTooltip.style("visibility", "visible");})
+				.on("mousemove", function(){return dateSliderTooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");})
+				.on("mouseout", function(){return dateSliderTooltip.style("visibility", "hidden");});
+		}
+			
 		// * Includes Entity
 		sliderPanel.selectAll("rect.entity-bars")
 			.data(window.connectionCountArray)
@@ -208,7 +216,11 @@ $(function(){
 			.attr("height", function(d) { return d.includesEntity / 10000.0; })
 			.attr("width", 1.0 * dateSliderWidth / window.connectionCountArray.length)
 			.attr("x", function(d) { return window.sliderX(d.monthDate); })
-			.attr("y", function(d) { return sliderHeightOffset - d.includesEntity / 10000.0; });
+			.attr("y", function(d) { return sliderHeightOffset - d.includesEntity / 10000.0; })
+			.on("mouseover", function(){return dateSliderTooltip.style("visibility", "visible");})
+			.on("mousemove", function(){return dateSliderTooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");})
+			.on("mouseout", function(){return dateSliderTooltip.style("visibility", "hidden");});
+			
 	
 		// Date (month) having the most connections
 		var maxConnectionBar = sliderPanel.selectAll("rect.max-connection-bar")
