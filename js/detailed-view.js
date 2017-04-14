@@ -1,4 +1,4 @@
-// startig point for the detailed view graph
+// starting point for the detailed view graph
 function drawGraph(code, code_type){
 	var width = Math.max(960, window.innerWidth),
 		height = Math.max(500, 0.4752 * width);
