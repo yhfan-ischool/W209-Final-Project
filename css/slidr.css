@@ -1,0 +1,7 @@
+// Customizing a specific controller arrow.
+aside[id*="-control"] .slidr-control.right:after {
+  border-color: transparent !important;
+}
+body {
+  overflow: hidden;
+}

@@ -5,6 +5,8 @@ window.dateBrush = null;
 window.dateSliderHandle = null;
 window.connectionSelectorPanel = null;
 window.selectedDate = null;
+window.inclOfficers = true;
+window.inclIntermediaries = true;
 window.apiEndPoints = {
   'all' : 'edges_all_countries_json/%selected_date%/',
   'country_code' : 'edges_by_country_json/%selected_date%/countrycode/%country_code%/incl_officers/%incl_officers%/incl_intermediaries/%incl_intermediaries%/maxrecursions/%max_recursions%/',

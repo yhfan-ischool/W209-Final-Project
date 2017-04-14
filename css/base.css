@@ -59,4 +59,13 @@ body {
   stroke: #B9ff33;
   stroke-width: 2px;
   stroke-opacity: .8;
+  z-index:10;
+}
+
+.start-circle{
+	z-index:100 !important;
+}
+aside[id*="-control"] .slidr-control.right:after {
+  border-color: transparent !important;
+  pointer-events: none;
 }

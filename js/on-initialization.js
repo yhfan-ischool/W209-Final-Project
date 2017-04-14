@@ -18,10 +18,8 @@ $(function(){
 	// this event fires whenenver one of the checkboxes is filled
 	$("input[type='checkbox']").change(function(){
 		if(this.id!='chk_entity'){
-			officer_selected = $("#chk-officer").is(":checked");
-			intermediary_selected = $("#chk-intermediary").is(":checked");
-			
-			alert("Officer selected: "+ officer_selected + ",\nIntermediary_selected: " + intermediary_selected );
+			window.inclOfficers = $("#chk-officer").is(":checked");
+			window.inclIntermediaries = $("#chk-intermediary").is(":checked");
 		}
 	});
 
@@ -287,7 +285,7 @@ $(function(){
 			.style("left", (width - 100) / 2)
 			.html(d3.time.format("%b %Y")(window.selectedDate));
 
-		var url = requestUrl(window.apiEndPoints["all"], window.selectedDate, null, null, true, true, null);
+		var url = requestUrl(window.apiEndPoints["all"], window.selectedDate, null, null, true);
 		fetchData(url, function( data ) {
 			dataArray = data;
 			zoomed();
@@ -295,7 +293,7 @@ $(function(){
 	}
 
 	// Initial data fetch on load.
-	var initialRequestUrl = requestUrl(window.apiEndPoints["all"], window.selectedDate, null, null, true, true, null);
+	var initialRequestUrl = requestUrl(window.apiEndPoints["all"], window.selectedDate, null, null, true);
 	console.log( "initialRequestUrl: ", initialRequestUrl );
 	fetchData(initialRequestUrl, function( data ) {
 		dataArray = data;
@@ -441,19 +439,19 @@ $(function(){
 	}
 });
 
-function requestUrl (endPoint, date, nodeId = null, countryCode = null, includesOfficers = true, includesIntermediaries = true, depth = null) {
+function requestUrl (endPoint, date, nodeId = null, countryCode = null, depth = null) {
 	var selectedDateString = d3.time.format("%Y-%m-01")(date);
 	console.log( "selectedDateString: ", selectedDateString );
 	if( nodeId == null ) { node_id='0'; }
 	if( countryCode == null ){ countryCode = ''; }
-	if( includesOfficers == null ) { includesOfficers = false; }
-	if( includesIntermediaries == null ) { includesIntermediaries = false; }
+	if( window.inclOfficers == null ) { window.inclOfficers = false; }
+	if( window.inclIntermediaries == null ) { window.inclIntermediaries = false; }
 	if( depth == null ) { depth = 3; }
 	var url= '//localhost:8080/' + endPoint.replace( "%selected_date%", selectedDateString )
 										   .replace( "%node_id", nodeId )
 										   .replace( "%country_code%", countryCode )
-										   .replace( "%incl_officers%", (includesOfficers == true ? 'true' : 'false') )
-										   .replace( "%incl_intermediaries%", (includesIntermediaries == true ? 'true' : 'false') )
+										   .replace( "%incl_officers%", (window.inclOfficers == true ? 'true' : 'false') )
+										   .replace( "%incl_intermediaries%", (window.inclIntermediaries == true ? 'true' : 'false') )
 										   .replace( "%max_recursions%", depth );
 	console.log( "requestUrl: ",  url );
 	return url;

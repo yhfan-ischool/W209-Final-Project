@@ -18,15 +18,14 @@ function circleClick(el,codeType ){
 	code = $(el).attr("countryCode")
 	console.log(codeType, code);
 	
-	// $("#dialog-title").text(codeType);
-	// $("#dialog-code").text('Click on the code: ' + code);
-	// $("#network-view").text( codeType + ' Placeholder: ' + code )
-	advanceToDetailView();
+	$("#dialog-title").text(codeType);
+	$("#dialog-code").text('Click on the code: ' + code);
+	$("#network-view").text( codeType + ' Placeholder: ' + code )
 	drawGraph(code, 'country_code');
-	// $("#myModal").modal();
+	$("#myModal").modal();
 }
 
 function advanceToDetailView(){
-	// $("#myModal").modal("hide");
+	$("#myModal").modal("hide");
 	globalSlidr.slide("three");
 }
