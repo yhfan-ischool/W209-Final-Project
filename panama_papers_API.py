@@ -200,7 +200,7 @@ def get_edges_by_nonentity_json(selected_date, node_id, incl_entities, incl_offi
 	
 
 # ---------------------------
-# GET Edges_By_NonEntity
+# GET Connection_Counts
 # ---------------------------
 # use this URI for calling the function from jQuery
 # http://127.0.0.1:8080/connection_counts/
@@ -214,6 +214,48 @@ def get_connection_counts():
 	results = []
 	for r in query.cursor.fetchall():
 		record = { "date": str(r[0]),
+			"includes_entity": str(r[1]), 
+			"includes_officer": str(r[2]),
+			"includes_intermediary": str(r[3]),
+			"total": str(r[4])
+		}
+		results.append(record)
+		
+	print "results count: %d\n" % len(results)
+	return results
+	
+# use this URI for viewing the results in a browser
+# http://127.0.0.1:8080/connection_counts_json/
+@app.route('/connection_counts_json/', methods=['GET'])
+def get_connection_counts_json():	
+	return jsonify(get_connection_counts())
+	
+# ---------------------------
+# GET Conection_Counts_By_Country
+# ---------------------------
+# use this URI for calling the function from jQuery
+# http://127.0.0.1:8080/connection_counts_by_country/2016-12-01
+@app.route('/connection_counts_by_country/<selected_date>/', methods=['GET'])
+def get_connection_counts_by_country(selected_date):	
+	conn = e.connect()
+	query_string = ("SELECT "
+					"    country_code, "
+					"    includes_entity, "
+					"    includes_officer, "
+					"    includes_intermediary, "
+					"    total "
+					"FROM connection_count_by_country "
+					"WHERE "
+					"    date= '" + selected_date + "' "
+					"AND total > 0 "
+					"ORDER BY "
+					"   total; ")
+	print "\n%s" % query_string
+	query = conn.execute(query_string)
+	
+	results = []
+	for r in query.cursor.fetchall():
+		record = { "country_code": r[0],
 			"includes_entity": str(r[1]),
 			"includes_officer": str(r[2]),
 			"includes_intermediary": str(r[3]),
@@ -224,11 +266,11 @@ def get_connection_counts():
 	print "results count: %d\n" % len(results)
 	return results
 	
-# http://127.0.0.1:8080/connection_counts_json/
-@app.route('/connection_counts_json/', methods=['GET'])
-def get_connection_counts_json():	
-	return jsonify(get_connection_counts())
-	
+# use this URI for viewing the results in a browser
+# http://127.0.0.1:8080/connection_counts_by_country_json/2016-12-01
+@app.route('/connection_counts_by_country_json/<selected_date>/', methods=['GET'])
+def get_connection_counts_by_country_json(selected_date):	
+	return jsonify(get_connection_counts_by_country(selected_date))
 	
 
 # ---------------------------
