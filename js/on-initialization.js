@@ -10,8 +10,8 @@ $(function(){
 	$(window).on("resize", function () {
 		setElementWidth("resize");
 	});
-
-	$("#dialog-code").click(function(){
+	
+	$("#dialog-title-code").click(function(){
 		advanceToDetailView()
 	});
 	
@@ -134,14 +134,6 @@ $(function(){
 	console.log("spinner", "on");
 	document.getElementById("loader").style.display = "block";
 	
-	// Define the div for the tooltip
-	var dateSliderTooltip = d3.select("body")
-		.append("div")
-		.style("position", "absolute")
-		.style("z-index", "10")
-		.style("visibility", "hidden")
-		.text("a simple tooltip");		
-
 	var dataArray = [];
 	
 	// Data galore!
@@ -154,8 +146,8 @@ $(function(){
 		    .clamp(true);
 
 		window.dateBrush = d3.svg.brush()
-		    .x(sliderX)
-		    .extent([sliderX.domain()[0],sliderX.domain()[0]])
+		    .x(window.sliderX)
+			.extent([window.sliderX.domain()[0],window.sliderX.domain()[0]])
 		    .on("brush", brushed)
 		    .on("brushend",brushended);
 
@@ -178,17 +170,14 @@ $(function(){
 		drawDateSlider();
 		
 		// Slider handlers
-		var brushTimer;
 		function brushedValue(target, event) {
 			var value;
 
 			if (typeof window.dateBrush.extent() !== "undefined") {
 				value = window.dateBrush.extent()[0];
-				console.log(value);
 
 				if (event) { // not a programmatic event
 					value = d3.time.day.offset(d3.time.month.round(window.sliderX.invert(d3.mouse(target)[0])),-1);
-
 					window.dateBrush.extent([value, value]);
 				}
 			} else {
@@ -204,10 +193,6 @@ $(function(){
 			var endEvent = d3.event.sourceEvent;
 
 			window.dateSliderHandle.attr("cx", window.sliderX(brushedValue(this, endEvent)));
-			sliderPanel.selectAll("rect.entity-bars")
-				.on("mouseover", null)
-				.on("mousemove", null)
-				.on("mouseout", null);
 		};
 
 		function brushended() {
@@ -216,18 +201,6 @@ $(function(){
 			var endEvent = d3.event.sourceEvent;
 			var v = brushedValue(target, endEvent);
 			updateMap(v);
-
-			sliderPanel.selectAll("rect.entity-bars")
-				.on("mouseover", function(){
-					console.log("mouseo");
-					return dateSliderTooltip.style("visibility", "visible");
-					})
-				.on("mousemove", function(){
-					console.log("mousemove");
-					return dateSliderTooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");
-				})
-				.on("mouseout", function(){return dateSliderTooltip.style("visibility", "hidden");});
-			
 		}
 	}
 	
@@ -288,7 +261,6 @@ $(function(){
 			.attr("x", function(d) { return window.sliderX(d.monthDate); })
 			.attr("y", function(d) { return sliderHeightOffset - d.includesEntity / 10000.0; });
 			
-	
 		// Date (month) having the most connections
 		var maxConnectionBar = sliderPanel.selectAll("rect.max-connection-bar")
 			.data([{ maxConnection: maxConnection, maxConnectionDate: maxConnectionDate }])
@@ -300,6 +272,7 @@ $(function(){
 			.attr("width", 1.0 * dateSliderWidth / window.connectionCountArray.length)
 			.attr("x", function(d) { return window.sliderX(d.maxConnectionDate); })
 			.attr("y", function(d) { return sliderHeightOffset - d.maxConnection / 10000.0; });
+		
 		sliderPanel.append("text")
 				   .attr("x", window.sliderX(maxConnectionDate))
 				   .attr("y", sliderHeightOffset - 20 - maxConnection / 10000.0)
@@ -309,14 +282,16 @@ $(function(){
 
 		window.slider = sliderPanel.append("g")
 			.attr("class", "date-slider")
-			.call(dateBrush);
+			.call(window.dateBrush);
 
 		slider.selectAll(".extent,.resize")
 			.remove();
 
+		
 		slider.select(".background")
 			.attr("height", height);
 
+		
 		window.dateSliderHandle = slider.append("circle")
 			.attr("class", "date-slider-handle")
 			.attr("transform", "translate(0," + sliderHeightOffset + ")")
@@ -324,6 +299,7 @@ $(function(){
 			.style("stroke", "#707070")
 			.style("stroke-width", 2)
 			.style("fill", "#FFEDA0");
+		
 	}
 
 	function updateMap( value ) {
@@ -485,4 +461,3 @@ $(function(){
 		return "";
 	}
 });
-

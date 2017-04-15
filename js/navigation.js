@@ -18,12 +18,14 @@ function circleClick(el,codeType ){
 	code = $(el).attr("countryCode")
 	console.log(codeType, code);
 	
-	$("#dialog-title").text(codeType);
-	$("#dialog-code").text('Click on the code: ' + code);
+	$("#dialog-title-type").text(codeType);
+	$("#dialog-title-code").text(code);
 	$("#network-view").text( codeType + ' Placeholder: ' + code )
 	drawGraph(code, 'country_code');
+	chartCountryConnections(code);
 	$("#myModal").modal();
 }
+
 
 function advanceToDetailView(){
 	$("#myModal").modal("hide");

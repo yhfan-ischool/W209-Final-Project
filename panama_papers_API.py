@@ -239,27 +239,32 @@ def get_connection_counts_json():
 def get_connection_counts_by_country(selected_date):	
 	conn = e.connect()
 	query_string = ("SELECT "
-					"    country_code, "
-					"    includes_entity, "
-					"    includes_officer, "
-					"    includes_intermediary, "
-					"    total "
-					"FROM connection_count_by_country "
+					"    concat_ws( ' ', c.country::text, cc.country_code::text ) AS country, "
+					"    cc.country_code, "
+					"    cc.includes_entity, "
+					"    cc.includes_officer, "
+					"    cc.includes_intermediary, "
+					"    cc.total "
+					"FROM "
+					"    connection_count_by_country cc "
+					"    JOIN country_geos c ON c.alpha_3_code = cc.country_code " 
 					"WHERE "
-					"    date= '" + selected_date + "' "
-					"AND total > 0 "
+					"    cc.date= '" + selected_date + "' "
+					"AND cc.total > 0 "
 					"ORDER BY "
-					"   total; ")
+					"    cc.total DESC; ")
 	print "\n%s" % query_string
 	query = conn.execute(query_string)
 	
 	results = []
 	for r in query.cursor.fetchall():
-		record = { "country_code": r[0],
-			"includes_entity": str(r[1]),
-			"includes_officer": str(r[2]),
-			"includes_intermediary": str(r[3]),
-			"total": str(r[4])
+		record = { 
+			"country": r[0],
+			"country_code": r[1],
+			"includes_entity": str(r[2]),
+			"includes_officer": str(r[3]),
+			"includes_intermediary": str(r[4]),
+			"total": str(r[5])
 		}
 		results.append(record)
 		
