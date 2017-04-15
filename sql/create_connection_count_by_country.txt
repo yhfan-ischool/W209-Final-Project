@@ -1,0 +1,22 @@
+CREATE TABLE IF NOT EXISTS connection_count_by_country(
+	date date NOT NULL,
+	country_code char(3) NOT NULL,
+	includes_entity int NULL,
+	includes_officer int NULL,
+	includes_intermediary int NULL,
+	total int NULL,
+		CONSTRAINT PK_connection_count_by_country PRIMARY KEY (	date, country_code )
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS IX_connection_count_by_country1 ON connection_count_by_country( date,country_code );
+
+CREATE TABLE IF NOT EXISTS connection_count(
+	date date NOT NULL,
+	includes_entity int NULL,
+	includes_officer int NULL,
+	includes_intermediary int NULL,
+	total int NULL,
+		CONSTRAINT PK_connection_count_by_country PRIMARY KEY (	date, country_code )
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS IX_connection_count1 ON connection_count( date );
