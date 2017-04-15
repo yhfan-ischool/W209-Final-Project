@@ -20,6 +20,8 @@ $(function(){
 		if(this.id!='chk_entity'){
 			window.inclOfficers = $("#chk-officer").is(":checked");
 			window.inclIntermediaries = $("#chk-intermediary").is(":checked");
+			zoomed();
+			drawDateSlider();
 		}
 	});
 
@@ -127,14 +129,22 @@ $(function(){
 			setUpDateSlider(minDate, maxDate);
 		});
 
+	
+		
 	console.log("spinner", "on");
 	document.getElementById("loader").style.display = "block";
 	
+	// Define the div for the tooltip
+	var dateSliderTooltip = d3.select("body")
+		.append("div")
+		.style("position", "absolute")
+		.style("z-index", "10")
+		.style("visibility", "hidden")
+		.text("a simple tooltip");		
 
 	var dataArray = [];
-
+	
 	// Data galore!
-
 	function setUpDateSlider(minDate, maxDate) {
 		// setup our brush as slider for date selection
 		var sliderHeightOffset = dateSliderHeight / 2;
@@ -149,13 +159,6 @@ $(function(){
 		    .on("brush", brushed)
 		    .on("brushend",brushended);
 
-		// Define the div for the tooltip
-		var dateSliderTooltip = d3.select("body")
-			.append("div")
-			.style("position", "absolute")
-			.style("z-index", "10")
-			.style("visibility", "hidden")
-			.text("a simple tooltip");		
 			
 		sliderPanel.append("g")
 		    .attr("class", "slider-x axis")
@@ -170,101 +173,10 @@ $(function(){
 		    .attr("class", "halo");
 
         // Bar chart of the connection count on the date slider
-        var barColors = [ ['Officer', "#A1D99B"], ['Intermediary', "#FC9272"], ['Entity', "#A6BDDB"] ];
-		
-			// * Includes Officer
-		if(window.inclOfficers){
-			sliderPanel.selectAll("rect.officer-bars")
-				.data(window.connectionCountArray)
-				.enter()
-				.append("rect")
-				.style("fill", barColors[0][1])
-				.attr("class", "officer-bars")
-				.attr("height", function(d) { return (d.includesEntity + d.includesIntermediary + d.includesOfficer) / 10000.0; })
-				.attr("width", 1.0 * dateSliderWidth / window.connectionCountArray.length)
-				.attr("x", function(d) { return window.sliderX(d.monthDate); })
-				.attr("y", function(d) { return sliderHeightOffset - (d.includesEntity + d.includesIntermediary + d.includesOfficer) / 10000.0; })
-				.on("mouseover", function(){return dateSliderTooltip.style("visibility", "visible");})
-				.on("mousemove", function(){return dateSliderTooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");})
-				.on("mouseout", function(){return dateSliderTooltip.style("visibility", "hidden");});
-		}
-				   
-		// * Includes Intermediary
-		if(window.inclIntermediaries){
-			sliderPanel.selectAll("rect.intermediary-bars")
-				.data(window.connectionCountArray)
-				.enter()
-				.append("rect")
-				.style("fill", barColors[1][1])
-				.attr("class", "intermediary-bars")
-				.attr("height", function(d) { return (d.includesEntity + d.includesIntermediary) / 10000.0; })
-				.attr("width", 1.0 * dateSliderWidth / window.connectionCountArray.length)
-				.attr("x", function(d) { return window.sliderX(d.monthDate); })
-				.attr("y", function(d) { return sliderHeightOffset - (d.includesEntity + d.includesIntermediary) / 10000.0; })
-				.on("mouseover", function(){return dateSliderTooltip.style("visibility", "visible");})
-				.on("mousemove", function(){return dateSliderTooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");})
-				.on("mouseout", function(){return dateSliderTooltip.style("visibility", "hidden");});
-		}
-			
-		// * Includes Entity
-		sliderPanel.selectAll("rect.entity-bars")
-			.data(window.connectionCountArray)
-			.enter()
-			.append("rect")
-			.style("fill", barColors[2][1])
-			.attr("class", "entity-bars")
-			.attr("height", function(d) { return d.includesEntity / 10000.0; })
-			.attr("width", 1.0 * dateSliderWidth / window.connectionCountArray.length)
-			.attr("x", function(d) { return window.sliderX(d.monthDate); })
-			.attr("y", function(d) { return sliderHeightOffset - d.includesEntity / 10000.0; })
-			.on("mouseover", function(){return dateSliderTooltip.style("visibility", "visible");})
-			.on("mousemove", function(){return dateSliderTooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");})
-			.on("mouseout", function(){return dateSliderTooltip.style("visibility", "hidden");});
-			
+        
 	
-		// Date (month) having the most connections
-		var maxConnectionBar = sliderPanel.selectAll("rect.max-connection-bar")
-			.data([{ maxConnection: maxConnection, maxConnectionDate: maxConnectionDate }])
-			.enter()
-			.append("rect")
-			.style("fill", "#ABABAB")
-			.attr("class", "max-connection-bar")
-			.attr("height", function(d) { return d.maxConnection / 10000.0; })
-			.attr("width", 1.0 * dateSliderWidth / window.connectionCountArray.length)
-			.attr("x", function(d) { return window.sliderX(d.maxConnectionDate); })
-			.attr("y", function(d) { return sliderHeightOffset - d.maxConnection / 10000.0; });
-		sliderPanel.append("text")
-		           .attr("x", window.sliderX(maxConnectionDate))
-		           .attr("y", sliderHeightOffset - 20 - maxConnection / 10000.0)
-		           .attr("dy", "1em")
-		           .style("font-size", "0.8em")
-		           .text(maxConnection);
-
-		var legend = sliderPanel.append("g")
-								.attr("class", "legend")
-								.attr("x", 0)
-								.attr("y", 25)
-								.attr("height", 80)
-								.attr("width",100);
-
-		window.slider = sliderPanel.append("g")
-		    .attr("class", "date-slider")
-		    .call(dateBrush);
-
-		slider.selectAll(".extent,.resize")
-		    .remove();
-
-		slider.select(".background")
-		    .attr("height", height);
-
-		window.dateSliderHandle = slider.append("circle")
-		    .attr("class", "date-slider-handle")
-		    .attr("transform", "translate(0," + sliderHeightOffset + ")")
-		    .attr("r", 4)
-		    .style("stroke", "#707070")
-		    .style("stroke-width", 2)
-		    .style("fill", "#FFEDA0");
-
+		drawDateSlider();
+		
 		// Slider handlers
 		var brushTimer;
 		function brushedValue(target, event) {
@@ -292,6 +204,10 @@ $(function(){
 			var endEvent = d3.event.sourceEvent;
 
 			window.dateSliderHandle.attr("cx", window.sliderX(brushedValue(this, endEvent)));
+			sliderPanel.selectAll("rect.entity-bars")
+				.on("mouseover", null)
+				.on("mousemove", null)
+				.on("mouseout", null);
 		};
 
 		function brushended() {
@@ -300,7 +216,114 @@ $(function(){
 			var endEvent = d3.event.sourceEvent;
 			var v = brushedValue(target, endEvent);
 			updateMap(v);
+
+			sliderPanel.selectAll("rect.entity-bars")
+				.on("mouseover", function(){
+					console.log("mouseo");
+					return dateSliderTooltip.style("visibility", "visible");
+					})
+				.on("mousemove", function(){
+					console.log("mousemove");
+					return dateSliderTooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");
+				})
+				.on("mouseout", function(){return dateSliderTooltip.style("visibility", "hidden");});
+			
 		}
+	}
+	
+	function drawDateSlider(){
+		var sliderHeightOffset = dateSliderHeight / 2;
+		var barColors = [ ['Officer', "#A1D99B"], ['Intermediary', "#FC9272"], ['Entity', "#A6BDDB"] ];
+		sliderPanel.selectAll("rect.officer-bars")
+			.remove();
+		sliderPanel.selectAll("rect.intermediary-bars")
+			.remove();
+			
+		// * Includes Officer
+		if(window.inclOfficers){
+			sliderPanel.selectAll("rect.officer-bars")
+				.data(window.connectionCountArray)
+				.enter()
+				.append("rect")
+				.style("fill", barColors[0][1])
+				.attr("class", "officer-bars")
+				.attr("height", function(d) { return d.includesOfficer / 10000.0;})
+				.attr("width", 1.0 * dateSliderWidth / window.connectionCountArray.length)
+				.attr("x", function(d) { return window.sliderX(d.monthDate); })
+				.attr("y", function(d) { 
+					entitiesHeight = d.includesEntity / 10000.0;
+					officersHeight = d.includesOfficer / 10000.0;
+					intermediariesHeight = d.includesIntermediary / 10000.0;
+					if( window.inclIntermediaries ){
+						return sliderHeightOffset - ( entitiesHeight + officersHeight + intermediariesHeight );
+					}else{							
+						return sliderHeightOffset - ( entitiesHeight + officersHeight );
+					}
+				});
+		}
+
+		// * Includes Intermediary
+		if(window.inclIntermediaries){
+			sliderPanel.selectAll("rect.intermediary-bars")
+				.data(window.connectionCountArray)
+				.enter()
+				.append("rect")
+				.style("fill", barColors[1][1])
+				.attr("class", "intermediary-bars")
+				.attr("height", function(d) { return d.includesIntermediary / 10000.0; })
+				.attr("width", 1.0 * dateSliderWidth / window.connectionCountArray.length)
+				.attr("x", function(d) { return window.sliderX(d.monthDate); })
+				.attr("y", function(d) { return sliderHeightOffset - (d.includesEntity + d.includesIntermediary) / 10000.0;});
+		}
+			
+		// * Includes Entity
+		sliderPanel.selectAll("rect.entity-bars")
+			.data(window.connectionCountArray)
+			.enter()
+			.append("rect")
+			.style("fill", barColors[2][1])
+			.attr("class", "entity-bars")
+			.attr("height", function(d) { return d.includesEntity / 10000.0; })
+			.attr("width", 1.0 * dateSliderWidth / window.connectionCountArray.length)
+			.attr("x", function(d) { return window.sliderX(d.monthDate); })
+			.attr("y", function(d) { return sliderHeightOffset - d.includesEntity / 10000.0; });
+			
+	
+		// Date (month) having the most connections
+		var maxConnectionBar = sliderPanel.selectAll("rect.max-connection-bar")
+			.data([{ maxConnection: maxConnection, maxConnectionDate: maxConnectionDate }])
+			.enter()
+			.append("rect")
+			.style("fill", "#ABABAB")
+			.attr("class", "max-connection-bar")
+			.attr("height", function(d) { return d.maxConnection / 10000.0; })
+			.attr("width", 1.0 * dateSliderWidth / window.connectionCountArray.length)
+			.attr("x", function(d) { return window.sliderX(d.maxConnectionDate); })
+			.attr("y", function(d) { return sliderHeightOffset - d.maxConnection / 10000.0; });
+		sliderPanel.append("text")
+				   .attr("x", window.sliderX(maxConnectionDate))
+				   .attr("y", sliderHeightOffset - 20 - maxConnection / 10000.0)
+				   .attr("dy", "1em")
+				   .style("font-size", "0.8em")
+				   .text(maxConnection);
+
+		window.slider = sliderPanel.append("g")
+			.attr("class", "date-slider")
+			.call(dateBrush);
+
+		slider.selectAll(".extent,.resize")
+			.remove();
+
+		slider.select(".background")
+			.attr("height", height);
+
+		window.dateSliderHandle = slider.append("circle")
+			.attr("class", "date-slider-handle")
+			.attr("transform", "translate(0," + sliderHeightOffset + ")")
+			.attr("r", 4)
+			.style("stroke", "#707070")
+			.style("stroke-width", 2)
+			.style("fill", "#FFEDA0");
 	}
 
 	function updateMap( value ) {

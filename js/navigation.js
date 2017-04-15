@@ -37,7 +37,7 @@ function requestUrl (endPoint, date, nodeId = null, countryCode = null, depth = 
 	if( countryCode == null ){ countryCode = ''; }
 	if( window.inclOfficers == null ) { window.inclOfficers = false; }
 	if( window.inclIntermediaries == null ) { window.inclIntermediaries = false; }
-	if( depth == null ) { depth = 3; }
+	if( depth == null ) { depth = 5; }
 	var url= '//localhost:8080/' + endPoint.replace( "%selected_date%", selectedDateString )
 										   .replace( "%node_id", nodeId )
 										   .replace( "%country_code%", countryCode )

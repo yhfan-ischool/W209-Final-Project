@@ -100,7 +100,8 @@ function drawHive(plotElementId, infoElementId, width, height, nodeTypes, nodes,
       .attr("cx", function(d) { return radius(d.node.index); })
       .attr("r", 4)
       .on("mouseover", nodeMouseover)
-      .on("mouseout", mouseout);
+      .on("mouseout", mouseout)
+	  .on("onclick", function(d){ drawGraph(d.node1.id, d.node1.type);});
 
 
   // Initialize the info display.
