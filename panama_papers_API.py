@@ -279,6 +279,54 @@ def get_connection_counts_by_country_json(selected_date):
 	
 
 # ---------------------------
+# GET Conection_Counts_One_Country
+# ---------------------------
+# use this URI for calling the function from jQuery
+# http://127.0.0.1:8080/connection_counts_one_country/2016-12-01/countrycode/USA/
+@app.route('/connection_counts_one_country/<selected_date>/countrycode/<country_code>/', methods=['GET'])
+def get_connection_counts_one_country(selected_date, country_code):	
+	conn = e.connect()
+	query_string = ("SELECT "
+					"    concat_ws( ' ', c.country::text, cc.country_code::text ) AS country, "
+					"    cc.country_code, "
+					"    cc.includes_entity, "
+					"    cc.includes_officer, "
+					"    cc.includes_intermediary, "
+					"    cc.total "
+					"FROM "
+					"    connection_count_by_country cc "
+					"    JOIN country_geos c ON c.alpha_3_code = cc.country_code " 
+					"WHERE "
+					"    cc.date= '" + selected_date + "' "
+					"AND cc.country_code = '" + country_code + "' "
+					"ORDER BY "
+					"    cc.total DESC; ")
+	print "\n%s" % query_string
+	query = conn.execute(query_string)
+	
+	results = []
+	for r in query.cursor.fetchall():
+		record = { 
+			"country": r[0],
+			"country_code": r[1],
+			"includes_entity": str(r[2]),
+			"includes_officer": str(r[3]),
+			"includes_intermediary": str(r[4]),
+			"total": str(r[5])
+		}
+		results.append(record)
+		
+	print "results count: %d\n" % len(results)
+	return results
+	
+# use this URI for viewing the results in a browser
+# http://127.0.0.1:8080/connection_counts_one_country_json/2016-12-01/countrycode/USA/
+@app.route('/connection_counts_one_country_json/<selected_date>/countrycode/<country_code>/', methods=['GET'])
+def get_connection_counts_one_country_json(selected_date, country_code):	
+	return jsonify(get_connection_counts_one_country(selected_date, country_code))
+	
+
+# ---------------------------
 if __name__=='__main__':
 	test_con = e.connect()
 	test_query = "SELECT * FROM country_geos LIMIT 1;"

@@ -1,9 +1,19 @@
 // draws the connections chart in the modal dialog for the selected country
 function chartCountryConnections(countryCode){
 	var ctx = $("#dialog-canvas").get(0).getContext("2d");
-	//console.log("dialog-canvas", ctx);
+	console.log("dialog-canvas: ", ctx);
 	var myChart = new Chart(ctx, {
 		type: 'bar',
+		data: [12, 19, 3, 5, 2, 3],
+		options: {
+			scales: {
+				yAxes: [{
+					stacked: true
+				}]
+			}
+		}
+		
+		/*
 		data: {
 			labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
 			datasets: [{
@@ -37,5 +47,7 @@ function chartCountryConnections(countryCode){
 				}]
 			}
 		}
-	});	
+		*/
+    });	
+	console.log("dialog-canvas chart: ", myChart);
 }
