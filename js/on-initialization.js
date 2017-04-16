@@ -200,7 +200,9 @@ $(function(){
 			var target = this;
 			var endEvent = d3.event.sourceEvent;
 			var v = brushedValue(target, endEvent);
+			window.selectedDatePosition = v;
 			updateMap(v);
+			drawGraph(window.selectedCountry, 'country_code');
 		}
 	}
 	
@@ -211,6 +213,8 @@ $(function(){
 			.remove();
 		sliderPanel.selectAll("rect.intermediary-bars")
 			.remove();
+		sliderPanel.selectAll("g.date-slider")
+		    .remove();
 			
 		// * Includes Officer
 		if(window.inclOfficers){
@@ -299,6 +303,8 @@ $(function(){
 			.style("stroke", "#707070")
 			.style("stroke-width", 2)
 			.style("fill", "#FFEDA0");
+		window.dateSliderHandle
+		    .attr("cx", window.sliderX(window.selectedDatePosition));
 		
 	}
 

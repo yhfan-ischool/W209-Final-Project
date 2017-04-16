@@ -18,6 +18,7 @@ function circleClick(el,codeType ){
 	code = $(el).attr("countryCode")
 	console.log(codeType, code);
 	
+	window.selectedCountry = code;
 	$("#dialog-title-type").text(codeType);
 	$("#dialog-title-code").text(code);
 	$("#network-view").text( codeType + ' Placeholder: ' + code )
