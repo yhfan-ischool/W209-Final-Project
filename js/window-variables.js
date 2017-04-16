@@ -5,7 +5,6 @@ window.dateBrush = null;
 window.dateSliderHandle = null;
 window.connectionSelectorPanel = null;
 window.selectedDate = null;
-window.selectedDatePosition = null;
 window.selectedCountry = 'ARE';
 window.inclOfficers = true;
 window.inclIntermediaries = true;
