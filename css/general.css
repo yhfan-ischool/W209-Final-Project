@@ -26,22 +26,30 @@ img.clip-path{
 /* var barColors = [ ['Intermediary', "#A1D99B"], ['Officer', "#FC9272"], ['Entity', "#A6BDDB"] ]; */
 input[type=checkbox] + label{
 	padding-left:4px;
-	padding-right:10px;
-	margin-right:10px;
 }
 .checkbox-container{
 	width:150px;
 }
 #chk-officer + label{
 	color:#A1D99B;
+	padding-right:40px;
 }
 #chk-intermediary + label{
 	color:#FC9272;
-	margin-right:5px;
+	padding-right:40px;
 }
 #chk-entity + label{
 	color:#A6BDDB;
 }
+label{
+	margin-bottom:10px;
+}
+#connection-count-total{
+	display:inline-block;
+	color: gray;
+	margin-left:50px;
+}
+
 #chk-entity{
 	pointer-events:none
 }

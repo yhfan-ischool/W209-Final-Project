@@ -31,7 +31,6 @@ $(function(){
 	$("#dialog").hide();
 
 	function setElementWidth(desc){
-		console.log("setElementWidth", desc);
 		var elwidth = $(window).width();
 		$("#title-image").css("max-width", elwidth);
 		var styles = {
@@ -309,7 +308,6 @@ $(function(){
 		slider.select(".background")
 			.attr("height", height);
 
-
 		window.dateSliderHandle = slider.append("circle")
 			.attr("class", "date-slider-handle")
 			.attr("transform", "translate(0," + sliderHeightOffset + ")")
@@ -317,6 +315,7 @@ $(function(){
 			.style("stroke", "#707070")
 			.style("stroke-width", 2)
 			.style("fill", "#FFEDA0");
+		
 		window.dateSliderHandle
 		    .attr("cx", window.sliderX(window.selectedDate));
 
@@ -342,7 +341,6 @@ $(function(){
 
 	// Initial data fetch on load.
 	var initialRequestUrl = requestUrl(window.apiEndPoints["all"], window.selectedDate, null, null, null);
-	console.log( "initialRequestUrl: ", initialRequestUrl );
 	fetchData(initialRequestUrl, function( data ) {
 		window.dataArray = data;
 
@@ -404,20 +402,13 @@ $(function(){
 		var startArray = [];
 		var endArray = [];
 		var edgeArray = [];
-		var officerCount = 0;
-		var intermediaryCount = 0;
-		var entityCount = 0;
 		var total =0;
 		window.dataArray.forEach(function(v) {
 		// Project data's lat/lon to map's coordinates
-
 			ignore = ( ( v.node_type_1 =='officer' || v.node_type_2 =='officer' ) &&  !window.inclOfficers ) ||
 					 ( ( v.node_type_1 =='intermediary' || v.node_type_2 =='intermediary' ) &&  !window.inclIntermediaries );
 			total += 1;
 			if( !ignore ){
-				if( v.node_type_1 =='officer' || v.node_type_2 =='officer' ){ officerCount += 1; }
-				if( v.node_type_1 =='intermediary' || v.node_type_2 =='intermediary' ){ intermediaryCount += 1; }
-				if( v.node_type_1 =='entity' || v.node_type_2 =='entity' ){ entityCount += 1; }
 
 				var startCoordinates = projection([parseFloat(v.x1), parseFloat(v.y1)]);
 				var endCoordinates = projection([parseFloat(v.x2), parseFloat(v.y2)]);
@@ -451,10 +442,22 @@ $(function(){
 				});
 			}
 		});
-		$("#officer-conn-count").text("(" + officerCount + ")");
-		$("#intermediary-conn-count").text("(" + intermediaryCount + ")");
-		$("#entity-conn-count").text("(" + entityCount + ")");
-		console.log("fiterData (o,i, e, tot):", officerCount, intermediaryCount, entityCount, total );
+		
+		// get the connection_counts for the selected date
+		var url = requestUrl (window.apiEndPoints['connections_by_date'], window.selectedDate, null, null, null);
+		fetchData(url, function( data ) {
+			// scale the counts
+			totals =  data[0]
+			officerConnections = parseInt( window.inclOfficers ? totals.includes_officer : 0);
+			intermediaryConnections = parseInt( window.inclIntermediaries ? totals.includes_intermediary : 0 );
+			totalConnections = parseInt( totals.includes_entity ) + officerConnections + intermediaryConnections;
+
+			$("#officer-conn-count").text("(" +  officerConnections + ")");
+			$("#intermediary-conn-count").text("(" + intermediaryConnections + ")");
+			$("#entity-conn-count").text("(" + totals.includes_entity + ")");
+			$("#connection-count-total").text("Total Connections: " + totalConnections );
+		});
+	
 		// Draw data points and links
 		drawData(startArray, endArray, edgeArray);
 	}
@@ -475,9 +478,9 @@ $(function(){
 			.attr("cy", function (d){ return d.y; })
 			.attr("onclick", "circleClick(this, 'Country')")
 			.append("svg:title")
-			.text(function (d){ return d.countryCode; });
+			.text(function (d){ return d.countryName; });
 
-			svg.selectAll("circle.end-circle").data(endPoints).enter().append("circle")
+		svg.selectAll("circle.end-circle").data(endPoints).enter().append("circle")
 			.attr("class", "end-circle")
 			.attr("r", 5)
 			.attr("fill", startColor)
@@ -487,7 +490,7 @@ $(function(){
 			.attr("cy", function (d){ return d.y; })
 			.attr("onclick", "circleClick(this, 'Country')")
 			.append("svg:title")
-			.text(function (d){ return d.countryCode; });
+			.text(function (d){ return d.countryName; });
 
 		svg.selectAll("path.edge")
 			.data(connections)

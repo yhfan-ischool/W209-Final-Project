@@ -77,6 +77,7 @@
 				<input type="checkbox" id="chk-officer" checked><label for="chk-officer">Officer<span id=officer-conn-count></span></label>
 				<input type="checkbox" id="chk-intermediary" checked><label for="chk-intermediary">Intermediary<span id=intermediary-conn-count></span></label>
 				<input type="checkbox" id="chk-entity" checked><label for="chk-entity">Entity<span id=entity-conn-count></span></label>
+				<span id="connection-count-total"><span>
 			</div>
 			<div id="date-slider"></div>
 		</div>
@@ -107,7 +108,6 @@
         <script src="js/slidr.js"></script>
         <script>
 			var globalSlidr = slidr.create('slidr-id', {
-			  before: function(e) { beforeSlide( e.out.slidr ); },
 			  after: function(e) { afterSlide( e.in.slidr ); },
 			  breadcrumbs: false,
 			  controls: 'none',

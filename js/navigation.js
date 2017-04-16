@@ -1,5 +1,4 @@
 function afterSlide(view) {
-	console.log( "slidr in:", view );
 	if( view == 'one'){
 		$("#date-slider-container").slideUp();
 		globalSlidr.controls('none');
@@ -7,17 +6,11 @@ function afterSlide(view) {
 		$("#date-slider-container").slideDown();;
 		globalSlidr.controls('border');
 	}
-	console.log( "slidr in display:", $("#date-slider-container").css("display") );
-}
-
-function beforeSlide(view) {
-	console.log('sldr out: ' + view);
 }
 
 function circleClick(el,codeType ){
 	code = $(el).attr("countryCode")
-	console.log(codeType, code);
-	
+		
 	window.selectedCountry = code;
 	$("#dialog-title-type").text(codeType);
 	$("#dialog-title-code").text(code);
@@ -36,7 +29,6 @@ function advanceToDetailView(){
 
 function requestUrl (endPoint, date, nodeId = null, countryCode = null, depth = null) {
 	var selectedDateString = d3.time.format("%Y-%m-01")(date);
-	console.log( "selectedDateString: ", selectedDateString );
 	if( nodeId == null ) { node_id='0'; }
 	if( countryCode == null ){ countryCode = ''; }
 	if( window.inclOfficers == null ) { window.inclOfficers = false; }
@@ -49,7 +41,6 @@ function requestUrl (endPoint, date, nodeId = null, countryCode = null, depth = 
             .replace( "%incl_officers%", (window.inclOfficers == true ? 'true' : 'false') )
             .replace( "%incl_intermediaries%", (window.inclIntermediaries == true ? 'true' : 'false') )
             .replace( "%max_recursions%", depth );
-	console.log( "requestUrl: ",  url );
 	return url;
 }
 
