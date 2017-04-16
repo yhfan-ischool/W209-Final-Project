@@ -314,7 +314,7 @@ $(function(){
 			.style("left", (width - 100) / 2)
 			.html(d3.time.format("%b %Y")(window.selectedDate));
 
-		var url = requestUrl(window.apiEndPoints["all"], window.selectedDate, null, null, true);
+		var url = requestUrl(window.apiEndPoints["all"], window.selectedDate, null, null, null);
 		fetchData(url, function( data ) {
 			dataArray = data;
 			zoomed();
@@ -322,7 +322,7 @@ $(function(){
 	}
 
 	// Initial data fetch on load.
-	var initialRequestUrl = requestUrl(window.apiEndPoints["all"], window.selectedDate, null, null, true);
+	var initialRequestUrl = requestUrl(window.apiEndPoints["all"], window.selectedDate, null, null, null);
 	console.log( "initialRequestUrl: ", initialRequestUrl );
 	fetchData(initialRequestUrl, function( data ) {
 		dataArray = data;

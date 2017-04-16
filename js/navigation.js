@@ -24,7 +24,9 @@ function circleClick(el,codeType ){
 	$("#network-view").text( codeType + ' Placeholder: ' + code )
 	drawGraph(code, 'country_code');
 	chartCountryConnections(code);
-	$("#myModal").modal();
+	$("#myModal").modal({
+		backdrop: "#dialog-canvas"
+	});
 }
 
 

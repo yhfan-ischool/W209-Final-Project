@@ -118,7 +118,8 @@
         </script>
 
 		<!-- Modal Dialog-->
-		<div class="modal fade" id="myModal" role="dialog">
+		<div class="modal fade" id="myModal" role="dialog" tabindex="-1" >
+		<!--<div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="dialog-title" aria-hidden="true">-->
 			<div class="modal-dialog">
 				<div class="modal-content">
 					<div class="modal-header">
@@ -129,8 +130,26 @@
 						</h4>
 					</div>
 					<div class="modal-body">
-						<div id="dialog-code"></div>
-						<canvas id="dialog-canvas" width="400" height="400"></canvas>
+						<table id="country-report">
+							<tr>
+								<td colspan="3"><div id="country-report-title"></div></td>
+							</tr>
+							<tr>
+								<td class="light-grey width-a"><div id="country-report-officer-line">Officer Connections</div></td>
+								<td class="light-grey width-b"><div id="country-report-officer-bar">&nbsp;</div></td>
+								<td class="light-grey width-c"><div id="country-report-officer-total"></div></td>
+							</tr>
+							<tr>
+								<td><div id="country-report-intermediary-line">intermediary Connections</div></td>
+								<td><div id="country-report-intermediary-bar">&nbsp;</div></td>
+								<td><div id="country-report-intermediary-total"></div></td>
+							</tr>
+							<tr>
+								<td><div id="country-report-entity-line">Entity Connections</div></td>
+								<td><div id="country-report-entity-bar">&nbsp;</div></td>
+								<td><div id="country-report-entity-total"></div></td>
+							</tr>
+						</table>
                     </div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -147,6 +166,6 @@
 				<li>Intermediaries</li>
 			</ul>
 		</div>
-
+		
 	</body>
 </html>

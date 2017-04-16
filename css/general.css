@@ -84,3 +84,55 @@ div.tooltip {
     border-radius: 8px;			
     pointer-events: none;			
 }
+
+/* country modal dialog */
+#country-report{
+	margin:20px;
+	border: 2px solid white;
+	border-collapse: collapse;
+}
+
+#country-report-title{
+	font-family:verdana;
+	font-weight:bold;
+	font-size:14px;
+	width:400px;
+	padding:4px;
+	padding-left:20px;
+	text-align:center;
+	float:center;
+}
+
+#country-report-officer-line,
+#country-report-intermediary-line,
+#country-report-entity-line{
+	text-align:right;
+	padding:4px;
+	font-family:verdana;
+	font-weight:normal;
+	font-size:12px;
+	float:right;
+}}
+
+#country-report-officer-line{
+	color:#a1d99b;
+}
+#country-report-intermediary-line{
+	color:#fc9272;
+}
+#country-report-entity-line{
+	color:#a6bddb;
+}
+
+#country-report-officer-total,
+#country-report-intermediary-total,
+#country-report-entity-total{
+	float:right;
+	text-align:right;
+	font-weight:normal;
+	font-size:11px;	
+	padding-right:4px;
+}
+ td.width-a{ width:200px; }
+ td.width-b{ width:250px; }
+ td.width-c{ width:75px; }

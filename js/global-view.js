@@ -1,53 +1,38 @@
 // draws the connections chart in the modal dialog for the selected country
 function chartCountryConnections(countryCode){
-	var ctx = $("#dialog-canvas").get(0).getContext("2d");
-	console.log("dialog-canvas: ", ctx);
-	var myChart = new Chart(ctx, {
-		type: 'bar',
-		data: [12, 19, 3, 5, 2, 3],
-		options: {
-			scales: {
-				yAxes: [{
-					stacked: true
-				}]
-			}
-		}
-		
-		/*
-		data: {
-			labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
-			datasets: [{
-				label: '# of Votes',
-				data: [12, 19, 3, 5, 2, 3],
-				backgroundColor: [
-					'rgba(255, 99, 132, 0.2)',
-					'rgba(54, 162, 235, 0.2)',
-					'rgba(255, 206, 86, 0.2)',
-					'rgba(75, 192, 192, 0.2)',
-					'rgba(153, 102, 255, 0.2)',
-					'rgba(255, 159, 64, 0.2)'
-				],
-				borderColor: [
-					'rgba(255,99,132,1)',
-					'rgba(54, 162, 235, 1)',
-					'rgba(255, 206, 86, 1)',
-					'rgba(75, 192, 192, 1)',
-					'rgba(153, 102, 255, 1)',
-					'rgba(255, 159, 64, 1)'
-				],
-				borderWidth: 1
-			}]
-		},
-		options: {
-			scales: {
-				yAxes: [{
-					ticks: {
-						beginAtZero:true
-					}
-				}]
-			}
-		}
-		*/
-    });	
-	console.log("dialog-canvas chart: ", myChart);
+	var barColors = [ ['Officer', "#A1D99B"], ['Intermediary', "#FC9272"], ['Entity', "#A6BDDB"] ];
+	
+	var url = requestUrl(window.apiEndPoints["connections_one_country"], window.selectedDate, null, countryCode, null);
+	fetchData(url, function( data ) {
+		obj = data[0];
+		maxCount = Math.max.apply( Math, [obj.includes_entity, obj.includes_intermediary, obj.includes_officer]);
+		console.log(maxCount, obj.includes_entity, obj.includes_intermediary, obj.includes_officer);
+		console.log("chartCountryConnections", countryCode, obj, obj.country );
+		$("#country-report-title").html("Total Connections for " + obj.country + ": " + obj.total);
+		$("#country-report-officer-bar").css({
+			"width" : obj.includes_officer / maxCount * 250,
+			"float" : "left",
+			"margin" : "0px 4px 0px 4px",
+			"height" : "14px",
+			"backgroundColor" : "#a1d99b"
+		});
+		$("#country-report-officer-total").html(obj.includes_officer);
+		$("#country-report-intermediary-bar").css( {
+			"width" : obj.includes_intermediary / maxCount * 250,
+			"float" : "left",
+			"margin" : "0px 4px 0px 4px",
+			"height" : "14px",
+			"backgroundColor" : "#fc9272"
+		});
+		$("#country-report-intermediary-total").html(obj.includes_intermediary);
+		$("#country-report-entity-bar").css({
+			"width" : obj.includes_entity / maxCount * 250,
+			"float" : "left",
+			"margin" : "0px 4px 0px 4px",
+			"height" : "14px",
+			"backgroundColor" : "#a6bddb"		
+		});
+		$("#country-report-entity-total").html(obj.includes_entity);
+	});
+	
 }
