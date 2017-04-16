@@ -42,12 +42,13 @@ function requestUrl (endPoint, date, nodeId = null, countryCode = null, depth = 
 	if( window.inclOfficers == null ) { window.inclOfficers = false; }
 	if( window.inclIntermediaries == null ) { window.inclIntermediaries = false; }
 	if( depth == null ) { depth = 5; }
-	var url= '//localhost:8080/' + endPoint.replace( "%selected_date%", selectedDateString )
-										   .replace( "%node_id", nodeId )
-										   .replace( "%country_code%", countryCode )
-										   .replace( "%incl_officers%", (window.inclOfficers == true ? 'true' : 'false') )
-										   .replace( "%incl_intermediaries%", (window.inclIntermediaries == true ? 'true' : 'false') )
-										   .replace( "%max_recursions%", depth );
+	var url= '//localhost:8080/' +
+        endPoint.replace( "%selected_date%", selectedDateString )
+            .replace( "%node_id", nodeId )
+            .replace( "%country_code%", countryCode )
+            .replace( "%incl_officers%", (window.inclOfficers == true ? 'true' : 'false') )
+            .replace( "%incl_intermediaries%", (window.inclIntermediaries == true ? 'true' : 'false') )
+            .replace( "%max_recursions%", depth );
 	console.log( "requestUrl: ",  url );
 	return url;
 }
