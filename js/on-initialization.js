@@ -200,7 +200,6 @@ $(function(){
 			var target = this;
 			var endEvent = d3.event.sourceEvent;
 			var v = brushedValue(target, endEvent);
-			window.selectedDatePosition = v;
 			updateMap(v);
 			drawGraph(window.selectedCountry, 'country_code');
 		}
@@ -209,6 +208,8 @@ $(function(){
 	function drawDateSlider(){
 		var sliderHeightOffset = dateSliderHeight / 2;
 		var barColors = [ ['Officer', "#A1D99B"], ['Intermediary', "#FC9272"], ['Entity', "#A6BDDB"] ];
+		sliderPanel.selectAll("rect.max-connection-bar")
+		    .remove();
 		sliderPanel.selectAll("rect.officer-bars")
 			.remove();
 		sliderPanel.selectAll("rect.intermediary-bars")
@@ -304,7 +305,7 @@ $(function(){
 			.style("stroke-width", 2)
 			.style("fill", "#FFEDA0");
 		window.dateSliderHandle
-		    .attr("cx", window.sliderX(window.selectedDatePosition));
+		    .attr("cx", window.sliderX(window.selectedDate));
 		
 	}
 
