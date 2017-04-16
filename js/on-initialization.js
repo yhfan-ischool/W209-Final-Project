@@ -22,6 +22,7 @@ $(function(){
 			window.inclIntermediaries = $("#chk-intermediary").is(":checked");
 			zoomed();
 			drawDateSlider();
+            drawGraph(window.selectedCountry, 'country_code');
 			filterData();
 		}
 	});
@@ -77,10 +78,13 @@ $(function(){
 	var layer = map.append("div")
 		.attr("class", "layer");
 
-	// Selected Date layer
-	var selectedDateLayer = map.append("div")
+	// Selected Date layer in map view
+	var mapSelectedDateLayer = map.append("div")
 		.attr("id", "selected-date")
 		.style("left", ((width - 100) / 2) + "px");
+    // Selected Date layer in detail view
+    var detailSelectedDateLayer = d3.select("div#network-view-selected-date")
+        .style("left", ((width - 100) / 2) + "px");
 
 	// Data layer
 	var svg = map.append("svg")
@@ -197,19 +201,19 @@ $(function(){
 		}
 
 		function brushed() {
-			var value;
 			var target = this;
 			var endEvent = d3.event.sourceEvent;
+			var value = brushedValue(this, endEvent);
 
-			window.dateSliderHandle.attr("cx", window.sliderX(brushedValue(this, endEvent)));
+            updateBrushedDate(value);
+			window.dateSliderHandle.attr("cx", window.sliderX(value));
 		};
 
 		function brushended() {
-			var value;
 			var target = this;
 			var endEvent = d3.event.sourceEvent;
-			var v = brushedValue(target, endEvent);
-			updateMap(v);
+			var value = brushedValue(target, endEvent);
+			updateMap(value);
 			drawGraph(window.selectedCountry, 'country_code');
 		}
 	}
@@ -318,12 +322,17 @@ $(function(){
 
 	}
 
-	function updateMap( value ) {
-		window.selectedDate = value;
-		selectedDateLayer
-			.style("left", (width - 100) / 2)
-			.html(d3.time.format("%b %Y")(window.selectedDate));
+	function updateBrushedDate(value) {
+        window.selectedDate = value;
+        mapSelectedDateLayer
+            .style("left", (width - 100) / 2)
+            .html(d3.time.format("%b %Y")(window.selectedDate));
+        detailSelectedDateLayer
+            .html(d3.time.format("%b %Y")(window.selectedDate));
+    }
 
+	function updateMap( value ) {
+        updateBrushedDate(value);
 		var url = requestUrl(window.apiEndPoints["all"], window.selectedDate, null, null, null);
 		fetchData(url, function( data ) {
 			window.dataArray = data;

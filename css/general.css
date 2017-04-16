@@ -57,6 +57,12 @@ input[type=checkbox] + label{
 
 /* Detail view */
 
+#network-view-selected-date {
+	position: absolute;
+	bottom: 15px;
+	z-index: 5;
+}
+
 .hive-axis {
 	  opacity: 0.5;
 	  stroke: #000;
@@ -85,6 +91,28 @@ input[type=checkbox] + label{
 	  stroke-opacity: 1;
 }
 
+.hive-grouping-legend {
+	float: left;
+	width: 10px;
+	height: 10px;
+	margin: 5px;
+	border: 1px solid rgba(0, 0, 0, .2);
+}
+
+.hive-axis-label {
+	position: absolute;
+	border-radius: 25px;
+	padding: 0px 10px 8px 10px;
+	background: #FFFFFF;
+}
+
+.inside-group {
+	background: #4368A1;
+}
+
+.outside-group {
+	background: #FFFF00;
+}
 
 div.network-view-data-tooltip {
     position: absolute;
