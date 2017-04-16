@@ -1,3 +1,4 @@
+window.dataArray = [];
 window.connectionCountArray = [];
 window.countryLookupTable = {};
 window.sliderX = null;

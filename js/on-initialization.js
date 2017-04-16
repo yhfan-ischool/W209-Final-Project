@@ -22,6 +22,7 @@ $(function(){
 			window.inclIntermediaries = $("#chk-intermediary").is(":checked");
 			zoomed();
 			drawDateSlider();
+			filterData();
 		}
 	});
 
@@ -37,6 +38,7 @@ $(function(){
 			height: .4752 * elwidth,
 			padding: "50px",
 			"background-color": "#dfe5ac",
+			"background-color": "#cacfd2 ",
 			"font-size":"16px"
 		};
 		$("#network-view").css(styles);
@@ -142,8 +144,6 @@ $(function(){
 
 	console.log("spinner", "on");
 	document.getElementById("loader").style.display = "block";
-
-	var dataArray = [];
 
 	// Data galore!
 	function setUpDateSlider(minDate, maxDate) {
@@ -326,7 +326,7 @@ $(function(){
 
 		var url = requestUrl(window.apiEndPoints["all"], window.selectedDate, null, null, null);
 		fetchData(url, function( data ) {
-			dataArray = data;
+			window.dataArray = data;
 			zoomed();
 		});
 	}
@@ -335,7 +335,7 @@ $(function(){
 	var initialRequestUrl = requestUrl(window.apiEndPoints["all"], window.selectedDate, null, null, null);
 	console.log( "initialRequestUrl: ", initialRequestUrl );
 	fetchData(initialRequestUrl, function( data ) {
-		dataArray = data;
+		window.dataArray = data;
 
 		document.getElementById("loader").style.display = "none";
 		console.log("spinner", "off");
@@ -387,43 +387,65 @@ $(function(){
 			.attr("class", "graticule")
 			.attr("d", path);
 
-		// Project data's lat/lon to map's coordinates
+
+		filterData();
+	}
+	
+	function filterData(){
 		var startArray = [];
 		var endArray = [];
 		var edgeArray = [];
+		var officerCount = 0;
+		var intermediaryCount = 0;
+		var entityCount = 0;
+		var total =0;
+		window.dataArray.forEach(function(v) {
+		// Project data's lat/lon to map's coordinates
 
-		dataArray.forEach(function(v) {
-			var startCoordinates = projection([parseFloat(v.x1), parseFloat(v.y1)]);
-			var endCoordinates = projection([parseFloat(v.x2), parseFloat(v.y2)]);
-			var monthDate = new Date(v.date);
+			ignore = ( ( v.node_type_1 =='officer' || v.node_type_2 =='officer' ) &&  !window.inclOfficers ) ||
+					 ( ( v.node_type_1 =='intermediary' || v.node_type_2 =='intermediary' ) &&  !window.inclIntermediaries );
+			total += 1;
+			if( !ignore ){
+				if( v.node_type_1 =='officer' || v.node_type_2 =='officer' ){ officerCount += 1; }
+				if( v.node_type_1 =='intermediary' || v.node_type_2 =='intermediary' ){ intermediaryCount += 1; }
+				if( v.node_type_1 =='entity' || v.node_type_2 =='entity' ){ entityCount += 1; }
 
-			startArray.push({
-				countryCode: v.country_code_1,
-				countryName: v.country_1,
-				longitude: v.x1,
-				latitude: v.y1,
-				x: startCoordinates[0],
-				y: startCoordinates[1],
-				monthDate: monthDate
-			});
-			endArray.push({
-				countryCode: v.country_code_2,
-				countryName: v.country_2,
-				longitude: v.x2,
-				latitude: v.y2,
-				x: endCoordinates[0],
-				y: endCoordinates[1],
-				monthDate: monthDate
-			});
-			edgeArray.push({
-				startX: startCoordinates[0],
-				startY: startCoordinates[1],
-				endX: endCoordinates[0],
-				endY: endCoordinates[1],
-				monthDate: monthDate
-			});
+				var startCoordinates = projection([parseFloat(v.x1), parseFloat(v.y1)]);
+				var endCoordinates = projection([parseFloat(v.x2), parseFloat(v.y2)]);
+				var monthDate = new Date(v.date);
+
+				startArray.push({
+					countryCode: v.country_code_1,
+					countryName: v.country_1,
+					longitude: v.x1,
+					latitude: v.y1,
+					x: startCoordinates[0],
+					y: startCoordinates[1],
+					monthDate: monthDate
+				});
+				endArray.push({
+					countryCode: v.country_code_2,
+					countryName: v.country_2,
+					longitude: v.x2,
+					latitude: v.y2,
+					x: endCoordinates[0],
+					y: endCoordinates[1],
+					monthDate: monthDate
+				});
+				edgeArray.push({
+					startX: startCoordinates[0],
+					startY: startCoordinates[1],
+					endX: endCoordinates[0],
+					endY: endCoordinates[1],
+					monthDate: monthDate,
+					weight: v.weight/100
+				});
+			}
 		});
-
+		$("#officer-conn-count").text("(" + officerCount + ")");
+		$("#intermediary-conn-count").text("(" + intermediaryCount + ")");
+		$("#entity-conn-count").text("(" + entityCount + ")");
+		console.log("fiterData (o,i, e, tot):", officerCount, intermediaryCount, entityCount, total );
 		// Draw data points and links
 		drawData(startArray, endArray, edgeArray);
 	}
@@ -442,24 +464,34 @@ $(function(){
 			.attr("countryCode", function (d){ return d.countryCode; })
 			.attr("cx", function (d){ return d.x; })
 			.attr("cy", function (d){ return d.y; })
-			.attr("onclick", "circleClick(this, 'Country')");
+			.attr("onclick", "circleClick(this, 'Country')")
+			.append("svg:title")
+			.text(function (d){ return d.countryCode; });
 
 			svg.selectAll("circle.end-circle").data(endPoints).enter().append("circle")
 			.attr("class", "end-circle")
 			.attr("r", 5)
-			.attr("fill", endColor)
+			.attr("fill", startColor)
 			.attr("title", "Country")
 			.attr("countryCode", function (d){ return d.countryCode; })
 			.attr("cx", function (d){ return d.x; })
 			.attr("cy", function (d){ return d.y; })
-			.attr("onclick", "circleClick(this, 'Country')");
+			.attr("onclick", "circleClick(this, 'Country')")
+			.append("svg:title")
+			.text(function (d){ return d.countryCode; });
 
-		svg.selectAll("path.edge").data(connections).enter().append("path")
+		svg.selectAll("path.edge")
+			.data(connections)
+			.enter()
+			.append("path")
 			.attr("class", "edge")
 			.attr("d", function(d) {
-				var sx = d.startX, sy = d.startY,
-					tx = d.endX, ty = d.endY,
-					dx = tx - sx, dy = ty - sy,
+				var sx = d.startX, 
+					sy = d.startY,
+					tx = d.endX, 
+					ty = d.endY,
+					dx = tx - sx * d.weight, 
+					dy = ty - sy * d.weight,
 					dr = 2 * Math.sqrt(dx * dx + dy * dy);
 				return "M" + sx + "," + sy + "A" + dr + "," + dr + " 0 0,1 " + tx + "," + ty;
 			});

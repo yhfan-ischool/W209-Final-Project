@@ -57,7 +57,7 @@ body {
 .edge {
   fill: none;
   stroke: #B9ff33;
-  stroke-width: 2px;
+  stroke-width: 1px;
   stroke-opacity: .8;
   z-index:10;
 }
