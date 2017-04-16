@@ -7,14 +7,16 @@
     groupingName: 'countryCode'
 */
 
-function drawHive(plotElementId, infoElementId, width, height, nodeTypes, nodes, links, groupingName) {
+function drawHive(plotElementId, width, height, nodeTypes, nodes, links, groupingName) {
   // This is hard coded to having exactly 3 types in the "nodeTypes" array.
   // We could make this a little more flexible if time permits.
-  var majorAngle = 2 * Math.PI / 3;
+  // var majorAngle = 2 * Math.PI / 3;
+  var offsetAngle = Math.PI / 8;
   var phi0 = -Math.PI / 2;
   var angle = d3.scale.ordinal()
       .domain(nodeTypes)
-      .range([phi0, phi0 + majorAngle, phi0 + 2 * majorAngle]);
+      .range([phi0, phi0 + Math.PI - offsetAngle, phi0 + Math.PI + offsetAngle]);
+      // .range([phi0, phi0 + majorAngle, phi0 + 2 * majorAngle]);
 
   var outerRadius = 0.7 * Math.min(height, width);
   var innerRadius = 0.1 * outerRadius;
@@ -36,8 +38,20 @@ function drawHive(plotElementId, infoElementId, width, height, nodeTypes, nodes,
       .attr("height", height)
       .style("z-index", 5)
       .append("g")
-      .attr("transform", "translate(" + outerRadius * 1.25 + "," + height * 0.42 + ")");
+      .attr("transform", "translate(" + outerRadius * 1.25 + "," + height * 0.41 + ")");
 
+  // Tooltip
+  var infoTooltip = $("div.network-view-data-tooltip");
+  if (infoTooltip.length > 0) {
+	infoTooltip = d3.select("body")
+	                .selectAll("div.network-view-data-tooltip")
+	                .remove();
+  } else {
+	infoTooltip = d3.select("body")
+	                .append("div")
+	                .attr("class", "network-view-data-tooltip")
+	                .style("opacity", 0);
+  }
 
   // Nest nodes by type, for computing the rank.
   var nodesByType = d3.nest()
@@ -65,8 +79,8 @@ function drawHive(plotElementId, infoElementId, width, height, nodeTypes, nodes,
       .append("line")
       .attr("class", "hive-axis")
       .attr("transform", function(d) { return "rotate(" + degrees(angle(d.key)) + ")"; })
-      .attr("x1", radius(-2))
-      .attr("x2", function(d) { return radius(d.count + 2); });
+      .attr("x1", radius(0))
+      .attr("x2", function(d) { return radius(d.count); });
 
   // Draw the links.
   svgHive.append("g")
@@ -98,38 +112,82 @@ function drawHive(plotElementId, infoElementId, width, height, nodeTypes, nodes,
       .append("circle")
       .attr("transform", function(d) { return "rotate(" + degrees(angle(d.type)) + ")"; })
       .attr("cx", function(d) { return radius(d.node.index); })
-      .attr("r", 4)
+      .attr("r", 8)
       .on("mouseover", nodeMouseover)
       .on("mouseout", mouseout)
 	  .on("onclick", function(d){ drawGraph(d.node1.id, d.node1.type);});
 
 
-  // Initialize the info display.
-  var info = d3.select(infoElementId)
-      .text(defaultInfo = "Showing " + links.length + " connections among " + nodes.length + " nodes.");
-
   // Highlight the link and connected nodes on mouseover.
   function linkMouseover(d) {
     svgHive.selectAll(".hive-link").classed("active", function(p) { return p === d; });
     svgHive.selectAll(".hive-node circle").classed("active", function(p) { return p === d.source || p === d.target; });
-    info.text("[" + (d.source.node.country_code == null ? "N/A" : d.source.node.country_code) + "] " +
-              d.source.node.name + "(" + d.source.node.type +
-              ") → [" +
-              (d.target.node.country_code == null ? "N/A" : d.target.node.country_code) + "] " +
-              d.target.node.name + "(" + d.target.node.type + ")");
+    infoTooltip.transition()
+        .duration(200)
+        .style("opacity", 0.85);
+    infoTooltip.html("<h4>" + d.source.node.name + "</h4>" +
+                     "<ul>" +
+                     "    <li><h5>Type: " + d.source.node.type + "</h5></li>" +
+                     "    <li><h5>Country: " + d.source.node.country_name + "</h5></li>" +
+                     "</ul>" +
+                     "<hr/>" +
+                     "<h4 style='color: red;'>[ " + d.relation_type + " ]</h4>" +
+                     "<hr/>" +
+                     "<h4>" + d.target.node.name + "</h4>" +
+                     "<ul>" +
+                     "    <li><h5>Type: " + d.target.node.type + "</h5></li>" +
+                     "    <li><h5>Country: " + d.target.node.country_name + "</h5></li>" +
+                     "</ul>")
+        .style("left", (d3.event.pageX) + "px")
+        .style("top", (d3.event.pageY - 24) + "px");
   }
 
   // Highlight the node and connected links on mouseover.
   function nodeMouseover(d) {
-    svgHive.selectAll(".hive-link").classed("active", function(p) { return p.source === d || p.target === d; });
+	var sourceNodes = [];
+	var targetNodes = [];
+    svgHive.selectAll(".hive-link")
+           .classed("active", function(p) {
+	          p.source === d ? targetNodes.push([p.target, p.relation_type]) : null;
+	          p.target === d ? sourceNodes.push([p.source, p.relation_type]) : null;
+	          return p.source === d || p.target === d;
+	       });
     d3.select(this).classed("active", true);
-    info.text("[" + (d.node.country_code == null ? "N/A" : d.node.country_code) + "] " + d.node.name + "(" + d.node.type + ")");
+    var sourceColumn = [];
+    sourceNodes.forEach(function(d) {
+	              sourceColumn.push(d[0].node.name + " is <span style='color: red;'>" + d[1] + "</span> ");
+                });
+    var targetColumn = [];
+    targetNodes.forEach(function(d) {
+                  targetColumn.push("is <span style='color: red;'>" + d[1] + "</span> " + d[0].node.name);
+                });
+
+    var selectedText = "<h4>" + d.node.name + "</h4>" +
+			           "<ul>" +
+			           "    <li><h5>Type: " + d.node.type + "</h5></li>" +
+			           "    <li><h5>Country: " + d.node.country_name + "</h5></li>" +
+			           "</ul>";
+    var content = "<table class='connectors'>" +
+                  "       <tr>" +
+                  "           <td class='connectors'>" + sourceColumn.join('<br/>') + "</td>" +
+                  "           <td class='connectors'>" + selectedText + "</td>" +
+                  "           <td class='connectors'>" + targetColumn.join('<br/>') + "</td>" +
+                  "       </tr>" +
+                  "</table>";
+    infoTooltip.transition()
+        .duration(200)
+        .style("opacity", 0.85);
+    infoTooltip.html(content)
+        .style("left", (d3.event.pageX) + "px")
+        .style("top", (d3.event.pageY - 24) + "px");
   }
 
   // Clear any highlighted nodes or links.
   function mouseout() {
     svgHive.selectAll(".active").classed("active", false);
-    info.text(defaultInfo);
+    infoTooltip.transition()
+        .duration(500)
+        .style("opacity", 0);
   }
 }
 

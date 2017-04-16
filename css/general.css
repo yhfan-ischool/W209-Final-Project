@@ -46,6 +46,7 @@ input[type=checkbox] + label{
 /* Detail view */
 
 .hive-axis {
+	  opacity: 0.5;
 	  stroke: #000;
 	  stroke-width: 1.5px;
 }
@@ -70,6 +71,24 @@ input[type=checkbox] + label{
 	  stroke: red;
 	  stroke-width: 2px;
 	  stroke-opacity: 1;
+}
+
+
+div.network-view-data-tooltip {
+    position: absolute;
+    color: #4368A1;
+    text-align: left;
+    padding: 5px 5px 5px 5px;
+    font: 12px sans-serif;
+    background: #ddd;
+    border: solid 0px #aaa;
+    border-radius: 8px;
+    pointer-events: none;
+    z-index: 10;
+}
+
+td.connectors {
+	border: 2px solid white;
 }
 
 div.tooltip {	

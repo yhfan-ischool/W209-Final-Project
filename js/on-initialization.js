@@ -10,11 +10,11 @@ $(function(){
 	$(window).on("resize", function () {
 		setElementWidth("resize");
 	});
-	
+
 	$("#dialog-title-code").click(function(){
 		advanceToDetailView()
 	});
-	
+
 	// this event fires whenenver one of the checkboxes is filled
 	$("input[type='checkbox']").change(function(){
 		if(this.id!='chk_entity'){
@@ -25,7 +25,7 @@ $(function(){
 		}
 	});
 
-	
+
 	$("#dialog").hide();
 
 	function setElementWidth(desc){
@@ -103,7 +103,8 @@ $(function(){
 	var maxConnectionDate = new Date(0);
 	window.selectedDate = window.selectedDate || new Date('2016-12-01');
 
-	if (window.connectionCountArray.length == 0)
+	if (window.connectionCountArray.length == 0) {
+		// Load the initial connection counts
 		d3.csv('data/connection_count.csv', function(data) {
 			data.forEach(function(v) {
 				var monthStartDate = new Date(v.date);
@@ -129,13 +130,21 @@ $(function(){
 			setUpDateSlider(minDate, maxDate);
 		});
 
-	
-		
+		// Load the country code-to-country name mapping
+		d3.csv('data/country_geos.csv', function(data) {
+			data.forEach(function(v) {
+				window.countryLookupTable[v.alpha_3_code] = v.country;
+			});
+		});
+	}
+
+
+
 	console.log("spinner", "on");
 	document.getElementById("loader").style.display = "block";
-	
+
 	var dataArray = [];
-	
+
 	// Data galore!
 	function setUpDateSlider(minDate, maxDate) {
 		// setup our brush as slider for date selection
@@ -151,7 +160,7 @@ $(function(){
 		    .on("brush", brushed)
 		    .on("brushend",brushended);
 
-			
+
 		sliderPanel.append("g")
 		    .attr("class", "slider-x axis")
 		    .attr("transform", "translate(0," + sliderHeightOffset + ")")
@@ -165,10 +174,10 @@ $(function(){
 		    .attr("class", "halo");
 
         // Bar chart of the connection count on the date slider
-        
-	
+
+
 		drawDateSlider();
-		
+
 		// Slider handlers
 		function brushedValue(target, event) {
 			var value;
@@ -204,7 +213,7 @@ $(function(){
 			drawGraph(window.selectedCountry, 'country_code');
 		}
 	}
-	
+
 	function drawDateSlider(){
 		var sliderHeightOffset = dateSliderHeight / 2;
 		var barColors = [ ['Officer', "#A1D99B"], ['Intermediary', "#FC9272"], ['Entity', "#A6BDDB"] ];
@@ -216,7 +225,7 @@ $(function(){
 			.remove();
 		sliderPanel.selectAll("g.date-slider")
 		    .remove();
-			
+
 		// * Includes Officer
 		if(window.inclOfficers){
 			sliderPanel.selectAll("rect.officer-bars")
@@ -228,13 +237,13 @@ $(function(){
 				.attr("height", function(d) { return d.includesOfficer / 10000.0;})
 				.attr("width", 1.0 * dateSliderWidth / window.connectionCountArray.length)
 				.attr("x", function(d) { return window.sliderX(d.monthDate); })
-				.attr("y", function(d) { 
+				.attr("y", function(d) {
 					entitiesHeight = d.includesEntity / 10000.0;
 					officersHeight = d.includesOfficer / 10000.0;
 					intermediariesHeight = d.includesIntermediary / 10000.0;
 					if( window.inclIntermediaries ){
 						return sliderHeightOffset - ( entitiesHeight + officersHeight + intermediariesHeight );
-					}else{							
+					}else{
 						return sliderHeightOffset - ( entitiesHeight + officersHeight );
 					}
 				});
@@ -253,7 +262,7 @@ $(function(){
 				.attr("x", function(d) { return window.sliderX(d.monthDate); })
 				.attr("y", function(d) { return sliderHeightOffset - (d.includesEntity + d.includesIntermediary) / 10000.0;});
 		}
-			
+
 		// * Includes Entity
 		sliderPanel.selectAll("rect.entity-bars")
 			.data(window.connectionCountArray)
@@ -265,7 +274,7 @@ $(function(){
 			.attr("width", 1.0 * dateSliderWidth / window.connectionCountArray.length)
 			.attr("x", function(d) { return window.sliderX(d.monthDate); })
 			.attr("y", function(d) { return sliderHeightOffset - d.includesEntity / 10000.0; });
-			
+
 		// Date (month) having the most connections
 		var maxConnectionBar = sliderPanel.selectAll("rect.max-connection-bar")
 			.data([{ maxConnection: maxConnection, maxConnectionDate: maxConnectionDate }])
@@ -277,7 +286,7 @@ $(function(){
 			.attr("width", 1.0 * dateSliderWidth / window.connectionCountArray.length)
 			.attr("x", function(d) { return window.sliderX(d.maxConnectionDate); })
 			.attr("y", function(d) { return sliderHeightOffset - d.maxConnection / 10000.0; });
-		
+
 		sliderPanel.append("text")
 				   .attr("x", window.sliderX(maxConnectionDate))
 				   .attr("y", sliderHeightOffset - 20 - maxConnection / 10000.0)
@@ -292,11 +301,11 @@ $(function(){
 		slider.selectAll(".extent,.resize")
 			.remove();
 
-		
+
 		slider.select(".background")
 			.attr("height", height);
 
-		
+
 		window.dateSliderHandle = slider.append("circle")
 			.attr("class", "date-slider-handle")
 			.attr("transform", "translate(0," + sliderHeightOffset + ")")
@@ -306,7 +315,7 @@ $(function(){
 			.style("fill", "#FFEDA0");
 		window.dateSliderHandle
 		    .attr("cx", window.sliderX(window.selectedDate));
-		
+
 	}
 
 	function updateMap( value ) {

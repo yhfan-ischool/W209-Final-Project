@@ -21,7 +21,6 @@ function circleClick(el,codeType ){
 	window.selectedCountry = code;
 	$("#dialog-title-type").text(codeType);
 	$("#dialog-title-code").text(code);
-	$("#network-view").text( codeType + ' Placeholder: ' + code )
 	drawGraph(code, 'country_code');
 	chartCountryConnections(code);
 	$("#myModal").modal({

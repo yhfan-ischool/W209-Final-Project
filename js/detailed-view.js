@@ -8,8 +8,7 @@ function drawGraph(code, code_type){
 	var s = "";
 	fetchData(url, function( data ) {
 		var dataCollection = {},
-            links = [],
-            defaultInfo;
+            links = [];
 
 		data.forEach(function(d) {
 			var key1 = [d.node_type_1, d.node_id1].join('_'),
@@ -21,7 +20,8 @@ function drawGraph(code, code_type){
 				node1 = {
 					id: d.node_id1,
 					type: d.node_type_1,
-					country_code: d.country_code_1,
+					country_code: d.country_code_1 == null ? 'N/A': d.country_code_1,
+					country_name: d.country_code_1 == null ? 'N/A': window.countryLookupTable[d.country_code_1],
 					name: d.node1_name,
 					connectors: []
 				};
@@ -35,7 +35,8 @@ function drawGraph(code, code_type){
 				node2 = {
 					id: d.node_id2,
 					type: d.node_type_2,
-					country_code: d.country_code_2,
+					country_code: d.country_code_2 == null ? 'N/A' : d.country_code_2,
+					country_name: d.country_code_2 == null ? 'N/A' : window.countryLookupTable[d.country_code_2],
 					name: d.node2_name,
 					connectors: []
 				};
@@ -45,7 +46,7 @@ function drawGraph(code, code_type){
 				node2.connectors.push(node2.target = { node: node2, degree: 0, type: d.node_type_2 });
 			}
 			
-			links.push({source: node1.source, target: node2.target});
+			links.push({source: node1.source, target: node2.target, relation_type: d.rel_type});
 			
 			dataCollection[key1] = node1;
 			dataCollection[key2] = node2;
@@ -53,7 +54,7 @@ function drawGraph(code, code_type){
 		});
 
 		var nodes = $.map(dataCollection, function(el) { return el });
-        drawHive('#network-view', '#network-view-data', width, height, ['Entity', 'Officer', 'Intermediary'], nodes, links, 'country_code');
+        drawHive('#network-view', width, height, ['Entity', 'Officer', 'Intermediary'], nodes, links, 'country_code');
 
 	});
 	

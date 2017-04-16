@@ -1,4 +1,5 @@
 window.connectionCountArray = [];
+window.countryLookupTable = {};
 window.sliderX = null;
 window.sliderPanel = null;
 window.dateBrush = null;
