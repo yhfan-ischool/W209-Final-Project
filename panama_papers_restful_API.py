@@ -18,11 +18,12 @@ def after_request(response):
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
     return response
 
-# ---------------------------
-# GET Edges_All_Countries	
-# ---------------------------
-# use this URI for calling the function from jQuery
-# http://127.0.0.1:8080/edges_all_countries/2013-12-01/
+'''
+---------------------------
+ GET Edges_All_Countries	
+---------------------------
+http://127.0.0.1:8080/edges_all_countries/2013-12-01/
+'''
 class EdgesAllCountries(Resource):
     def get(self, selected_date):
         conn = e.connect()
@@ -58,11 +59,12 @@ class EdgesAllCountries(Resource):
         print "results count: %d\n" % len(results)
         return results
 
-# ---------------------------
-# GET Edges_By_Country
-# ---------------------------
-# use this URI for calling the function from jQuery
-# http://127.0.0.1:8080/edges_by_country/2013-12-01/countrycode/USA/incl_officers/true/incl_intermediaries/true/maxrecursions/3/
+'''
+---------------------------
+ GET Edges_By_Country
+---------------------------
+http://127.0.0.1:8080/edges_by_country/2013-12-01/countrycode/USA/incl_officers/true/incl_intermediaries/true/maxrecursions/3/
+'''
 class EdgesByCountry(Resource):
     def get(self, selected_date, country_code, incl_officers, incl_intermediaries, max_recursions):
         conn = e.connect()
@@ -92,11 +94,12 @@ class EdgesByCountry(Resource):
         print "results count: %d\n" % len(results)
         return results
 
-# ---------------------------
-# GET Edges_By_Entity
-# ---------------------------
-# use this URI for calling the function from jQuery
-# http://127.0.0.1:8080/edges_by_entity/2013-12-01/nodeid/10019177/incl_officers/true/incl_intermediaries/true/maxrecursions/3/
+'''
+---------------------------
+ GET Edges_By_Entity
+---------------------------
+http://127.0.0.1:8080/edges_by_entity/2013-12-01/nodeid/10019177/incl_officers/true/incl_intermediaries/true/maxrecursions/3/
+'''
 class EdgesByEntity(Resource):
     def get(self, selected_date, node_id, incl_officers, incl_intermediaries, max_recursions):
         conn = e.connect()
@@ -126,11 +129,12 @@ class EdgesByEntity(Resource):
         print "results count: %d\n" % len(results)
         return results
 
-# ---------------------------
-# GET Edges_By_NonEntity
-# ---------------------------
-# use this URI for calling the function from jQuery
-# http://127.0.0.1:8080/edges_by_entity/2013-12-01/nodeid/12050406/incl_entities/true/incl_officers/true/incl_intermediaries/true/maxrecursions/3/
+'''
+---------------------------
+ GET Edges_By_NonEntity
+---------------------------
+http://127.0.0.1:8080/edges_by_entity/2013-12-01/nodeid/12050406/incl_entities/true/incl_officers/true/incl_intermediaries/true/maxrecursions/3/
+'''
 class EdgesByNonEntity(Resource):
     def get(self, selected_date, node_id, incl_entities, incl_officers, incl_intermediaries, max_recursions):
         conn = e.connect()
@@ -160,15 +164,16 @@ class EdgesByNonEntity(Resource):
         print "results count: %d\n" % len(results)
         return results
 
-# ---------------------------
-# GET Connection_Counts
-# ---------------------------
-# use this URI for calling the function from jQuery
-# http://127.0.0.1:8080/connection_counts/
+'''
+---------------------------
+ GET Connection_Counts
+---------------------------
+http://127.0.0.1:8080/connection_counts/
+'''
 class ConnectionCounts(Resource):
     def get(self):
         conn = e.connect()
-        query_string = "SELECT * FROM connection_counts ORDER BY date;"
+        query_string = "SELECT * FROM connection_count ORDER BY date;"
         print "\n%s" % query_string
         query = conn.execute(query_string)
 
@@ -178,18 +183,45 @@ class ConnectionCounts(Resource):
                 "includes_entity": str(r[1]),
                 "includes_officer": str(r[2]),
                 "includes_intermediary": str(r[3]),
-                "total": str(r[4])
+                "total": str(r[1] + r[2] + r[3])
             }
             results.append(record)
 
         print "results count: %d\n" % len(results)
         return results
 	
-# ---------------------------
-# GET Conection_Counts_By_Country
-# ---------------------------
-# use this URI for calling the function from jQuery
-# http://127.0.0.1:8080/connection_counts_by_country/2016-12-01
+'''
+---------------------------
+ GET Connection_Counts_By_Date
+---------------------------
+http://127.0.0.1:8080/connection_counts_by_date/2015-12-01/
+'''
+class ConnectionCountsByDate(Resource):
+    def get(self, selected_date):
+        conn = e.connect()
+        query_string = "SELECT * FROM connection_count Where date = '" + selected_date + "';"
+        print "\n%s" % query_string
+        query = conn.execute(query_string)
+
+        results = []
+        for r in query.cursor.fetchall():
+            record = { "date": str(r[0]),
+                "includes_entity": str(r[1]),
+                "includes_officer": str(r[2]),
+                "includes_intermediary": str(r[3]),
+                "total": str(r[1] + r[2] + r[3])
+            }
+            results.append(record)
+
+        print "results count: %d\n" % len(results)
+        return results
+	
+'''
+---------------------------
+GET Conection_Counts_By_Country
+---------------------------
+http://127.0.0.1:8080/connection_counts_by_country/2016-12-01
+'''
 class ConnectionCountsByCountry(Resource):
     def get(self, selected_date):
         conn = e.connect()
@@ -226,11 +258,12 @@ class ConnectionCountsByCountry(Resource):
         print "results count: %d\n" % len(results)
         return results
 
-# ---------------------------
-# GET Conection_Counts_One_Country
-# ---------------------------
-# use this URI for calling the function from jQuery
-# http://127.0.0.1:8080/connection_counts_one_country/2016-12-01/countrycode/USA/
+'''
+---------------------------
+ GET Conection_Counts_One_Country
+---------------------------
+http://127.0.0.1:8080/connection_counts_one_country/2016-12-01/countrycode/USA/
+'''
 class ConnectionCountsOneCountry(Resource):
     def get(self, selected_date, country_code):
         conn = e.connect()
@@ -268,13 +301,13 @@ class ConnectionCountsOneCountry(Resource):
         return results
 
 
-# These are the API endpoints.
-
+# API endpoints
 api.add_resource(EdgesAllCountries, '/edges_all_countries/<string:selected_date>/')
 api.add_resource(EdgesByCountry, '/edges_by_country/<string:selected_date>/countrycode/<string:country_code>/incl_officers/<string:incl_officers>/incl_intermediaries/<string:incl_intermediaries>/maxrecursions/<string:max_recursions>/')
 api.add_resource(EdgesByEntity, '/edges_by_entity/<string:selected_date>/nodeid/<string:node_id>/incl_officers/<string:incl_officers>/incl_intermediaries/<string:incl_intermediaries>/maxrecursions/<string:max_recursions>/')
 api.add_resource(EdgesByNonEntity, '/edges_by_entity/<string:selected_date>/nodeid/<string:node_id>/incl_entities/<string:incl_entities>/incl_officers/<string:incl_officers>/incl_intermediaries/<incl_intermediaries>/maxrecursions/<string:max_recursions>/')
 api.add_resource(ConnectionCounts, '/connection_counts/')
+api.add_resource(ConnectionCountsByDate, '/connection_counts_by_date/<string:selected_date>/')
 api.add_resource(ConnectionCountsByCountry, '/connection_counts_by_country/<string:selected_date>/')
 api.add_resource(ConnectionCountsOneCountry, '/connection_counts_one_country/<string:selected_date>/countrycode/<string:country_code>/')
 
