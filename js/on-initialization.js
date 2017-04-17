@@ -170,8 +170,10 @@ $(function(){
 		    .call(d3.svg.axis()
 					.scale(window.sliderX)
 					.orient("bottom")
-					.ticks(d3.time.years)
+					//.ticks(d3.time.years)
+					.ticks(d3.timeYear)
 					.tickFormat(d3.time.format("%Y")))
+					
 			.select(".domain")
 			.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
 		    .attr("class", "halo");
@@ -308,6 +310,7 @@ $(function(){
 		slider.select(".background")
 			.attr("height", height);
 
+		
 		window.dateSliderHandle = slider.append("circle")
 			.attr("class", "date-slider-handle")
 			.attr("transform", "translate(0," + sliderHeightOffset + ")")
@@ -316,7 +319,7 @@ $(function(){
 			.style("stroke-width", 2)
 			.style("fill", "#FFEDA0");
 		
-		window.dateSliderHandle
+			window.dateSliderHandle
 		    .attr("cx", window.sliderX(window.selectedDate));
 
 	}
