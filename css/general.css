@@ -211,6 +211,11 @@ div.tooltip {
 .col-sm-3 h2{
 	color:gray;
 	font-size:24px;
-	text-align:center;
-	float:center;
+	text-align:left;
+	padding-left:27px;
+}
+.col-sm-3 p{
+	color:gray;
+	text-align:left;
+	padding-left:10px;
 }

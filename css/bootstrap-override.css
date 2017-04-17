@@ -17,14 +17,9 @@
 	color:#666; 
 	font-size:17px;
 }
-footer{
-	background-color: #f4f6f6;
-	background-color: #EEEEEE;
-	margin:0;
-	width:100%;
-	font-size:18px;
-	padding-left:120px;
-	padding-top:5px;
+#footer-text{
+	margin-top:0px;
+	font-size:20px;
 	min-height:200px;
 	color:#4368A1;
 }
