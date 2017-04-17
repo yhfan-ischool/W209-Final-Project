@@ -207,3 +207,10 @@ div.tooltip {
  td.width-a{ width:200px; }
  td.width-b{ width:250px; }
  td.width-c{ width:75px; }
+
+.col-sm-3 h2{
+	color:gray;
+	font-size:24px;
+	text-align:center;
+	float:center;
+}
