@@ -10,10 +10,10 @@ function afterSlide(view) {
 
 function circleClick(el,codeType ){
 	code = $(el).attr("countryCode")
-		
+
 	window.selectedCountry = code;
 	$("#dialog-title-type").text(codeType);
-	$("#dialog-title-code").text(code);
+	$("#dialog-title-code").text(window.countryLookupTable[code] + ' (' + code + ')');
 	drawGraph(code, 'country_code');
 	chartCountryConnections(code);
 	$("#myModal").modal({
@@ -46,5 +46,5 @@ function requestUrl (endPoint, date, nodeId = null, countryCode = null, depth = 
 
 function fetchData(apiUrl, callbackFunction) {
 	console.log( "fetchData: ", apiUrl );
-	$.getJSON(apiUrl, callbackFunction);	
+	$.getJSON(apiUrl, callbackFunction);
 }

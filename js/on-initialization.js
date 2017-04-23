@@ -1,3 +1,19 @@
+function addCommasToInteger(number) {
+  var q = Math.floor(number / 1000);
+  if (q == 0)
+    return number.toString();
+  var result = (number - 1000 * q).toString();
+  var shiftedNumber = q;
+  var c = 3;
+  while (q > 0) {
+    q = Math.floor(shiftedNumber / 1000);
+    result = (shiftedNumber - 1000 * q).toString() + ',' + ('000' + result).substr(-c);
+    shiftedNumber = q;
+    c += 4;
+  }
+  return result;
+}
+
 $(function(){
 	$("#date-slider-container").css("display", "block").hide();
 	$(window).on("load", function () {
@@ -12,6 +28,10 @@ $(function(){
 	});
 
 	$("#dialog-title-code").click(function(){
+		advanceToDetailView()
+	});
+
+	$("#dialog-next-button").click(function(){
 		advanceToDetailView()
 	});
 
@@ -43,7 +63,6 @@ $(function(){
 		};
 		$("#network-view").css(styles);
 	}
-
 
 	var width = Math.max(960, window.innerWidth),
 		height = Math.max(500, 0.4752 * width),
@@ -173,7 +192,7 @@ $(function(){
 					//.ticks(d3.time.years)
 					.ticks(d3.timeYear)
 					.tickFormat(d3.time.format("%Y")))
-					
+
 			.select(".domain")
 			.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
 		    .attr("class", "halo");
@@ -214,6 +233,9 @@ $(function(){
 			var target = this;
 			var endEvent = d3.event.sourceEvent;
 			var value = brushedValue(target, endEvent);
+      console.log("spinner", "on");
+      document.getElementById("loader").style.display = "block";
+
 			updateMap(value);
 			drawGraph(window.selectedCountry, 'country_code');
 		}
@@ -310,7 +332,7 @@ $(function(){
 		slider.select(".background")
 			.attr("height", height);
 
-		
+
 		window.dateSliderHandle = slider.append("circle")
 			.attr("class", "date-slider-handle")
 			.attr("transform", "translate(0," + sliderHeightOffset + ")")
@@ -318,7 +340,7 @@ $(function(){
 			.style("stroke", "#707070")
 			.style("stroke-width", 2)
 			.style("fill", "#FFEDA0");
-		
+
 			window.dateSliderHandle
 		    .attr("cx", window.sliderX(window.selectedDate));
 
@@ -347,8 +369,8 @@ $(function(){
 	fetchData(initialRequestUrl, function( data ) {
 		window.dataArray = data;
 
-		document.getElementById("loader").style.display = "none";
-		console.log("spinner", "off");
+// 		document.getElementById("loader").style.display = "none";
+// 		console.log("spinner", "off");
 		zoomed();
 
 		window.dateSliderHandle.attr("cx", window.sliderX(window.selectedDate));
@@ -358,6 +380,9 @@ $(function(){
 	setElementWidth("ready");
 
 	zoomed();
+
+	console.log("spinner", "on");
+	document.getElementById("loader").style.display = "block";
 
 	function zoomed() {
 		var tiles = tile
@@ -400,7 +425,7 @@ $(function(){
 
 		filterData();
 	}
-	
+
 	function filterData(){
 		var startArray = [];
 		var endArray = [];
@@ -445,7 +470,7 @@ $(function(){
 				});
 			}
 		});
-		
+
 		// get the connection_counts for the selected date
 		var url = requestUrl (window.apiEndPoints['connections_by_date'], window.selectedDate, null, null, null);
 		fetchData(url, function( data ) {
@@ -455,12 +480,12 @@ $(function(){
 			intermediaryConnections = parseInt( window.inclIntermediaries ? totals.includes_intermediary : 0 );
 			totalConnections = parseInt( totals.includes_entity ) + officerConnections + intermediaryConnections;
 
-			$("#officer-conn-count").text("(" +  officerConnections + ")");
-			$("#intermediary-conn-count").text("(" + intermediaryConnections + ")");
-			$("#entity-conn-count").text("(" + totals.includes_entity + ")");
-			$("#connection-count-total").text("Total Connections: " + totalConnections );
+			$("#officer-conn-count").text("(" +  addCommasToInteger(officerConnections) + ")");
+			$("#intermediary-conn-count").text("(" + addCommasToInteger(intermediaryConnections) + ")");
+			$("#entity-conn-count").text("(" + addCommasToInteger(totals.includes_entity) + ")");
+			$("#connection-count-total").text("Total Connections: " + addCommasToInteger(totalConnections) );
 		});
-	
+
 		// Draw data points and links
 		drawData(startArray, endArray, edgeArray);
 	}
@@ -469,31 +494,6 @@ $(function(){
 		svg.selectAll("circle.start-circle").remove();
 		svg.selectAll("circle.end-circle").remove();
 		svg.selectAll("path.edge").remove();
-		svg.selectAll("circle.start-circle").data(startPoints).enter().append("circle")
-			.attr("class", "start-circle")
-			.attr("r", 10)
-			.attr("fill", startColor)
-			.attr("title", "Country")
-			.attr("data-toggle", "modal")
-			.attr("data-target", "#modalDI")
-			.attr("countryCode", function (d){ return d.countryCode; })
-			.attr("cx", function (d){ return d.x; })
-			.attr("cy", function (d){ return d.y; })
-			.attr("onclick", "circleClick(this, 'Country')")
-			.append("svg:title")
-			.text(function (d){ return d.countryName; });
-
-		svg.selectAll("circle.end-circle").data(endPoints).enter().append("circle")
-			.attr("class", "end-circle")
-			.attr("r", 5)
-			.attr("fill", startColor)
-			.attr("title", "Country")
-			.attr("countryCode", function (d){ return d.countryCode; })
-			.attr("cx", function (d){ return d.x; })
-			.attr("cy", function (d){ return d.y; })
-			.attr("onclick", "circleClick(this, 'Country')")
-			.append("svg:title")
-			.text(function (d){ return d.countryName; });
 
 		svg.selectAll("path.edge")
 			.data(connections)
@@ -501,16 +501,48 @@ $(function(){
 			.append("path")
 			.attr("class", "edge")
 			.attr("d", function(d) {
-				var sx = d.startX, 
+				var sx = d.startX,
 					sy = d.startY,
-					tx = d.endX, 
+					tx = d.endX,
 					ty = d.endY,
-					dx = tx - sx * d.weight, 
+					dx = tx - sx * d.weight,
 					dy = ty - sy * d.weight,
 					dr = 2 * Math.sqrt(dx * dx + dy * dy);
 				return "M" + sx + "," + sy + "A" + dr + "," + dr + " 0 0,1 " + tx + "," + ty;
 			});
 
+		svg.selectAll("circle.end-circle").data(endPoints).enter().append("circle")
+			.attr("class", "end-circle")
+			.attr("r", 5)
+			.attr("title", "Country")
+			.attr("countryCode", function (d){ return d.countryCode; })
+			.attr("cx", function (d){ return d.x; })
+			.attr("cy", function (d){ return d.y; })
+			.attr("onclick", "circleClick(this, 'Country')")
+			.style("fill", startColor)
+			.style("stroke", "#B0B0B0")
+			.style("stroke-width", 3)
+			.append("svg:title")
+			.text(function (d){ return d.countryName; });
+
+		svg.selectAll("circle.start-circle").data(startPoints).enter().append("circle")
+			.attr("class", "start-circle")
+			.attr("r", 10)
+			.attr("title", "Country")
+			.attr("data-toggle", "modal")
+			.attr("data-target", "#modalDI")
+			.attr("countryCode", function (d){ return d.countryCode; })
+			.attr("cx", function (d){ return d.x; })
+			.attr("cy", function (d){ return d.y; })
+			.attr("onclick", "circleClick(this, 'Country')")
+			.style("fill", startColor)
+			.style("stroke", "#B0B0B0")
+			.style("stroke-width", 3)
+			.append("svg:title")
+			.text(function (d){ return d.countryName; });
+
+		document.getElementById("loader").style.display = "none";
+		console.log("spinner", "off");
 	}
 
 	function matrix3d(scale, translate) {

@@ -1,7 +1,7 @@
 // starting point for the detailed view graph
 function drawGraph(code, code_type) {
-    var width = Math.max(960, window.innerWidth),
-        height = Math.max(500, 0.4752 * width);
+    var width = window.innerWidth,
+        height = 0.4752 * width;
 
     // Display the inside/outside country legend.
     var groupingLegend = $("div.hive-grouping-legend-container");
@@ -42,51 +42,51 @@ function drawGraph(code, code_type) {
         .append("div")
         .attr("class", "hive-axis-label")
         .style("left", "60px")
-        .style("top", (0.41 * height - 30) + "px")
+        .style("top", (0.41 * height - 70) + "px")
         .style("color", "#A6BDDB")
-        .html("<h3>Entities</h3>");
+        .html("<h3 class='hive-axis-label-h3'><img src='images/bank.png' height='50' width='50' /> Entities</h3>");
 
     if (window.inclIntermediaries == true) {
         d3.select("#network-view")
             .append("div")
             .attr("class", "hive-axis-label")
-            .style("left", 0.55 * width + "px")
+            .style("left", 0.5 * width + "px")
             .style("top", "20px")
             .style("color", "#FC9272")
-            .html("<h3>Intermediaries</h3>");
+            .html("<h3 class='hive-axis-label-h3'><img src='images/shady-middleman.jpg' height='60' width='60' /> Intermediaries</h3>");
         if (window.inclOfficers == true) {
             d3.select("#network-view")
                 .append("div")
                 .attr("class", "hive-axis-label")
                 .style("left", 0.55 * width + "px")
-                .style("top", (height - 90) + "px")
+                .style("top", (height - 110) + "px")
                 .style("color", "#A1D99B")
-                .html("<h3>Officers</h3>");
+                .html("<h3 class='hive-axis-label-h3'><img src='images/unknown-character.jpg' height='55' width='55' /> Officers</h3>");
         }
     } else {
         if (window.inclOfficers == true) {
             d3.select("#network-view")
                 .append("div")
                 .attr("class", "hive-axis-label")
-                .style("left", 0.55 * width + "px")
+                .style("left", 0.5 * width + "px")
                 .style("top", "20px")
                 .style("color", '#A1D99B')
-                .html("<h3>Officers</h3>");
+                .html("<h3 class='hive-axis-label-h3'><img src='images/unknown-character.jpg' height='55' width='55' /> Officers</h3>");
         } else {
             d3.select("#network-view")
                 .append("div")
                 .attr("class", "hive-axis-label")
-                .style("left", 0.55 * width + "px")
+                .style("left", 0.5 * width + "px")
                 .style("top", "20px")
                 .style("color", "#FC9272")
-                .html("<h3>Intermediaries</h3>");
+                .html("<h3 class='hive-axis-label-h3'><img src='images/shady-middleman.jpg' height='60' width='60' /> Intermediaries</h3>");
             d3.select("#network-view")
                 .append("div")
                 .attr("class", "hive-axis-label")
                 .style("left", 0.55 * width + "px")
-                .style("top", (height - 90) + "px")
+                .style("top", (height - 110) + "px")
                 .style("color", "#A1D99B")
-                .html("<h3>Officers</h3>");
+                .html("<h3 class='hive-axis-label-h3'><img src='images/unknown-character.jpg' height='55' width='55' /> Officers</h3>");
         }
     }
 
@@ -147,6 +147,8 @@ function drawGraph(code, code_type) {
         });
         drawHive('#network-view', width, height, ['Entity', 'Officer', 'Intermediary'], nodes, links, 'country_code');
 
+        document.getElementById("loader").style.display = "none";
+        console.log("spinner", "off");
     });
 
 }

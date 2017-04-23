@@ -12,7 +12,7 @@ img.clip-path{
 
 #slidr-map,
 #date-slider,
-#date-slider-container{ 
+#date-slider-container{
 	margin:0 !important;
 	padding:0 !important;
 }
@@ -109,9 +109,15 @@ label{
 
 .hive-axis-label {
 	position: absolute;
-	border-radius: 25px;
-	padding: 0px 10px 8px 10px;
+	border-radius: 20px;
+	padding: 0px 10px 0px 10px;
 	background: #FFFFFF;
+	height: 70px;
+	z-index: 20;
+}
+
+.hive-axis-label-h3 {
+	margin: 5px 0px 0px 0px;
 }
 
 .inside-group {
@@ -139,17 +145,17 @@ td.connectors {
 	border: 2px solid white;
 }
 
-div.tooltip {	
-    position: absolute;			
-    text-align: center;			
-    width: 60px;					
-    height: 28px;					
-    padding: 2px;				
-    font: 12px sans-serif;		
-    background: white;	
-    border: 0px;		
-    border-radius: 8px;			
-    pointer-events: none;			
+div.tooltip {
+    position: absolute;
+    text-align: center;
+    width: 60px;
+    height: 28px;
+    padding: 2px;
+    font: 12px sans-serif;
+    background: white;
+    border: 0px;
+    border-radius: 8px;
+    pointer-events: none;
 }
 
 /* country modal dialog */
@@ -201,7 +207,7 @@ div.tooltip {
 	float:right;
 	text-align:right;
 	font-weight:normal;
-	font-size:11px;	
+	font-size:11px;
 	padding-right:4px;
 }
  td.width-a{ width:200px; }
