@@ -1,0 +1,6 @@
+# Restart the API server once a day
+59 23 * * * $HOME/restart_panama_papers_api.sh >/dev/null 2>&1
+
+# Check the health of the API server periodically
+*/5 * * * * $HOME/check_panama_papers_api.sh >/dev/null 2>&1
+
