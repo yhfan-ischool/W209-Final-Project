@@ -19,11 +19,29 @@
 }
 #footer-text{
 	margin-top:0px;
-	font-size:20px;
-	min-height:200px;
+	font-size:22px;
+	color:#4368A1;
+}
+.about-header{
+	font-size:18px;
 	color:#4368A1;
 }
 .gray-container{
 	width:100%;
 	padding:0;
+}
+a.about-link:link,
+a.about-link:visited,
+a.about-link:hover{
+	color:#4368A1;
+}
+a.about-link:hover{
+	text-decoration:underline;
+}
+a.navbar-brand-right:link,
+a.navbar-brand-right:hover,
+a.navbar-brand-right:visited{
+	margin-top:5px;
+	float:right;
+	color:white;
 }
